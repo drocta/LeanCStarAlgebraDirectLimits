@@ -226,35 +226,6 @@ noncomputable def amplify
     ext ⟨i,a⟩ ⟨j,b⟩
     simp [kroneckerMap_apply, algebraMap_matrix_apply, one_apply, ← ite_and, and_comm]
 
-    /-
-    simp only [kroneckerMap_apply]
-    simp only [algebraMap_matrix_apply]
-    --simp only [Algebra.algebraMap_self, RingHom.id_apply, ite_mul, zero_mul, Prod.mk.injEq]
-    simp only [one_apply, Algebra.algebraMap_self, RingHom.id_apply, ite_mul, zero_mul, Prod.mk.injEq]
-    simp only [mul_ite, mul_one, mul_zero]
-    --simp [one_apply]
-    rw [← ite_and]
-    simp [and_comm]
-    -/
-
-
-
-
-    /-
-
-    rw [algebraMap_matrix_apply, algebraMap_matrix_apply]
-    simp only [Algebra.algebraMap_self]
-    simp only [Algebra.algebraMap_self, RingHom.id_apply, ite_mul, zero_mul, Prod.mk.injEq]
-
-
-    rw [@algebraMap_eq_diagonal,@algebraMap_eq_diagonal]
-    rw [Pi.algebraMap_def,Pi.algebraMap_def]
-    rw [@Algebra.algebraMap_eq_smul_one']
-    ext i j
-    simp only [kroneckerMap_apply]
-    rw [@algebraMap_matrix_apply]
-    simp-/
-
   map_star' := by
     intro A
     --have h : star (1: Matrix k k ℂ) = 1 := by simp only [star_one]
