@@ -462,7 +462,7 @@ have hkron1 : (1 : Matrix k k ℂ) ⊗ₖ (1 : Matrix k2 k2 ℂ) = (1 : Matrix (
     := one_kronecker_one
 -/
 
-lemma amplifyAssoc
+lemma amplify_assoc
     (n k k2 : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
     [Fintype k2] [DecidableEq k2] :
     ((Matrix.reindexAlgEquiv ℂ ℂ (Equiv.prodAssoc n k k2)).toAlgHom).comp
