@@ -3,6 +3,9 @@ import Mathlib.Analysis.CStarAlgebra.CStarMatrix
 import Mathlib.Analysis.CStarAlgebra.Matrix
 import Mathlib.LinearAlgebra.Matrix.Kronecker
 import Mathlib.LinearAlgebra.Matrix.Defs
+import Mathlib.Algebra.Star.StarAlgHom
+import Mathlib.RingTheory.MatrixAlgebra
+import Mathlib.RingTheory.TensorProduct.Basic
 
 #check SeminormedAddCommGroup
 #check StarRing
@@ -233,3 +236,150 @@ noncomputable def amplify
     rw [star_eq_conjTranspose, star_eq_conjTranspose, star_eq_conjTranspose,
     conjTranspose_kronecker]
 }
+
+#check Matrix.kroneckerStarAlgEquiv
+
+
+open scoped TensorProduct
+
+variable (mn : Type*) [Fintype mn] [DecidableEq mn]
+
+#synth Semiring (Matrix mn mn ℂ)
+#synth Algebra ℂ (Matrix mn mn ℂ)
+
+
+
+#print Algebra.TensorProduct.instSemiring
+
+/-
+noncomputable instance : Semiring ((Matrix mn mn ℂ) ⊗[ℂ] (Matrix mk mk ℂ)) :=
+    Algebra.TensorProduct.instSemiring
+
+-/
+
+/-
+noncomputable instance myI (n k : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
+: Semiring ((Matrix n n ℂ) ⊗[ℂ] (Matrix k k ℂ)) :=
+    @Algebra.TensorProduct.instSemiring ℂ (Matrix n n ℂ) (Matrix k k ℂ) _ _ _ _ _
+
+#synth Semiring ((Matrix mn mn ℂ) ⊗[ℂ] (Matrix mk mk ℂ))
+
+noncomputable instance myI2 (n k : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
+: Algebra ℂ ((Matrix n n ℂ) ⊗[ℂ] (Matrix k k ℂ)) :=
+    Algebra.TensorProduct.instAlgebra
+
+#synth Algebra ℂ ((Matrix mn mn ℂ) ⊗[ℂ] (Matrix mk mk ℂ))
+-/
+
+
+
+
+/-
+noncomputable def amplify2
+    (n k : Type*)
+    [Fintype n] [DecidableEq n]
+    [Fintype k] [DecidableEq k] :
+    Matrix n n ℂ →⋆ₐ[ℂ] Matrix (n × k) (n × k) ℂ :=
+  ((Matrix.kroneckerStarAlgEquiv n k ℂ): StarAlgHom ℂ ((Matrix n n ℂ) ⊗[ℂ] (Matrix k k ℂ)) (Matrix (n × k) (n × k) ℂ)).comp
+    (StarAlgHom.ofAlgHom
+      (Algebra.TensorProduct.includeLeft : Matrix n n ℂ →ₐ[ℂ]
+        TensorProduct ℂ (Matrix n n ℂ) (Matrix k k ℂ)))
+
+
+noncomputable def amplify3
+    (n k : Type*)
+    [Fintype n] [DecidableEq n]
+    [Fintype k] [DecidableEq k] :
+    Matrix n n ℂ →⋆ₐ[ℂ] Matrix (n × k) (n × k) ℂ :=
+  (show ((Matrix n n ℂ ⊗[ℂ] Matrix k k ℂ) →⋆ₐ[ℂ] Matrix (n × k) (n × k) ℂ) from
+      Matrix.kroneckerStarAlgEquiv n k ℂ).comp
+    (StarAlgHom.ofAlgHom
+      (Algebra.TensorProduct.includeLeft :
+        Matrix n n ℂ →ₐ[ℂ] Matrix n n ℂ ⊗[ℂ] Matrix k k ℂ))
+-/
+
+
+
+
+
+noncomputable def amplify4
+    (n k : Type*)
+    [Fintype n] [DecidableEq n]
+    [Fintype k] [DecidableEq k] :
+    Matrix n n ℂ →⋆ₐ[ℂ] Matrix (n × k) (n × k) ℂ :=
+{ toAlgHom :=
+    (Matrix.kroneckerAlgEquiv n k ℂ).toAlgHom.comp
+      (Algebra.TensorProduct.includeLeft :
+        Matrix n n ℂ →ₐ[ℂ] Matrix n n ℂ ⊗[ℂ] Matrix k k ℂ)
+  map_star' := by
+    intro A
+    -- prove:
+    -- kroneckerAlgEquiv (star (A ⊗ₜ 1)) = star (kroneckerAlgEquiv (A ⊗ₜ 1))
+    -- one way is to use the star-preservation theorem coming from kroneckerStarAlgEquiv
+    simpa using
+      (Matrix.kroneckerStarAlgEquiv n k ℂ).map_star' (A ⊗ₜ[ℂ] (1 : Matrix k k ℂ))
+}
+
+
+noncomputable def amplify5
+    (n k : Type*)
+    [Fintype n] [DecidableEq n]
+    [Fintype k] [DecidableEq k] :
+    Matrix n n ℂ →⋆ₐ[ℂ] Matrix (n × k) (n × k) ℂ :=
+{ toAlgHom :=
+    (Matrix.kroneckerStarAlgEquiv n k ℂ).toAlgEquiv.toAlgHom.comp
+      (Algebra.TensorProduct.includeLeft :
+        Matrix n n ℂ →ₐ[ℂ] Matrix n n ℂ ⊗[ℂ] Matrix k k ℂ)
+  map_star' := by
+    intro A
+    simpa using
+      (Matrix.kroneckerStarAlgEquiv n k ℂ).map_star' (A ⊗ₜ[ℂ] (1 : Matrix k k ℂ))
+}
+
+#check amplify4
+
+open scoped TensorProduct
+
+
+
+#check Matrix mn mn ℂ →ₐ[ℂ] Matrix mn mn ℂ ⊗[ℂ] Matrix mk mk ℂ
+
+noncomputable def amplify7
+    (n k : Type*)
+    [Fintype n] [DecidableEq n]
+    [Fintype k] [DecidableEq k] :
+    Matrix n n ℂ →⋆ₐ[ℂ] Matrix (n × k) (n × k) ℂ :=
+{ toAlgHom :=
+    (Matrix.kroneckerStarAlgEquiv n k ℂ).toAlgEquiv.toAlgHom.comp
+      (Algebra.TensorProduct.includeLeft :
+        Matrix n n ℂ →ₐ[ℂ] Matrix n n ℂ ⊗[ℂ] Matrix k k ℂ)
+  map_star' := by
+    intro A
+    simpa using
+      (Matrix.kroneckerStarAlgEquiv n k ℂ).map_star'
+        (A ⊗ₜ[ℂ] (1 : Matrix k k ℂ))
+}
+
+
+noncomputable def amplify8
+    (n k : Type*)
+    [Fintype n] [DecidableEq n]
+    [Fintype k] [DecidableEq k] :
+    Matrix n n ℂ →⋆ₐ[ℂ] Matrix (n × k) (n × k) ℂ := by
+    letI : Semiring ((Matrix n n ℂ) ⊗[ℂ] (Matrix k k ℂ)) :=
+        @Algebra.TensorProduct.instSemiring ℂ (Matrix n n ℂ) (Matrix k k ℂ) _ _ _ _ _
+    letI : Algebra ℂ ((Matrix n n ℂ) ⊗[ℂ] (Matrix k k ℂ)) :=
+        Algebra.TensorProduct.instAlgebra
+    exact
+{
+map_star' := by
+    intro A
+    simpa using
+    (Matrix.kroneckerStarAlgEquiv n k ℂ).map_star' (A ⊗ₜ[ℂ] (1 : Matrix k k ℂ))
+toAlgHom :=
+    (Matrix.kroneckerStarAlgEquiv n k ℂ).toAlgEquiv.toAlgHom.comp
+    (Algebra.TensorProduct.includeLeft :
+        Matrix n n ℂ →ₐ[ℂ] Matrix n n ℂ ⊗[ℂ] Matrix k k ℂ)
+}
+
+#check amplify8
