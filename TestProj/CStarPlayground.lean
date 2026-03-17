@@ -394,20 +394,6 @@ map_star' := by
   simp only [amplify, toAlgEquiv_kroneckerStarAlgEquiv, AlgEquiv.toAlgHom_eq_coe,
     StarAlgHom.coe_mk', AlgHom.coe_comp, AlgHom.coe_coe, Function.comp_apply,
     kroneckerAlgEquiv_apply]
-  have h :
-    (Algebra.TensorProduct.includeLeft (R := ℂ) (S := ℂ)
-      (A := Matrix n n ℂ) (B := Matrix k k ℂ) A)
-    =
-    A ⊗ₜ[ℂ] (1 : Matrix k k ℂ) :=
-        (Algebra.TensorProduct.includeLeft_apply
-          (R := ℂ) (S := ℂ)
-          (A := Matrix n n ℂ) (B := Matrix k k ℂ) A)
-  change
-    kroneckerLinearEquiv n n k k ℂ
-      (A ⊗ₜ[ℂ] (1 : Matrix k k ℂ))
-      =
-    A ⊗ₖ (1 : Matrix k k ℂ)
-  rw [← h]
   exact
     (kroneckerLinearEquiv_tmul
     (l:= n) (m := n) (n := k) (p := k)
@@ -488,6 +474,9 @@ lemma amplifyAssoc
     simp only [AlgEquiv.toAlgHom_eq_coe, AlgHom.coe_comp, AlgHom.coe_coe, StarAlgHom.coe_toAlgHom,
       StarAlgHom.coe_comp, Function.comp_apply, amplify_apply, reindexAlgEquiv_apply, reindex_apply,
       submatrix_apply, Equiv.prodAssoc_symm_apply, kroneckerMap_apply]
+    change
+      (A i₁ j₁) * ((1 : Matrix k k ℂ) i₂ j₂) * ((1 : Matrix k2 k2 ℂ) i₃ j₃) =
+      (A i₁ j₁) * ((1 : Matrix (k × k2) (k × k2) ℂ) (i₂, i₃) (j₂, j₃))
     rw [one_apply, one_apply, one_apply, mul_boole, mul_boole, mul_boole]
     simp only [Prod.mk.injEq]
     rw [← ite_and]
