@@ -47,6 +47,7 @@ noncomputable def amplify
     (R := 𝕜)
     A (1 : Matrix k k 𝕜))
 
+
 lemma amplify_assoc
   (n k k2 : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
   [Fintype k2] [DecidableEq k2] :
@@ -56,3 +57,29 @@ lemma amplify_assoc
   ext A
   have h := Matrix.kronecker_assoc A (1 : Matrix k k 𝕜) (1 : Matrix k2 k2 𝕜)
   simp [amplify_apply, h]
+
+
+-- @[simp]
+lemma amplify_one
+  (n k : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k] :
+  amplify n k (1 : Matrix n n 𝕜) = (1 : Matrix (n × k) (n × k) 𝕜) := by
+  exact (amplify n k).map_one
+
+lemma amplify_apply_apply
+  (n k : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
+  (A : Matrix n n 𝕜) (i j : n) (a b : k) :
+  (amplify n k A) (i, a) (j, b) = (if a = b then A i j else 0) := by
+  simp only [amplify_apply, Matrix.kroneckerMap_apply]
+  rw [Matrix.one_apply, mul_boole]
+
+
+lemma amplify_injective
+  (n k : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k] [Nonempty k] :
+  Function.Injective (amplify (𝕜 := 𝕜) n k) := by
+  intro A B h
+  ext i j
+  let d : k := Classical.choice ‹Nonempty k›
+  have h' : (amplify n k) A (i, d) (j, d) = (amplify n k) B (i, d) (j, d) :=
+    congrArg (fun f => f (i, d) (j, d)) h
+  simp only [amplify_apply_apply, ↓reduceIte] at h'
+  exact h'
