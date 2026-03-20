@@ -1,3 +1,7 @@
+import Mathlib.Analysis.RCLike.Basic
+import Mathlib.LinearAlgebra.Matrix.Reindex
+import Mathlib.RingTheory.MatrixAlgebra
+/-
 import Mathlib.Analysis.CStarAlgebra.Matrix
 import Mathlib.LinearAlgebra.Matrix.Kronecker
 import Mathlib.LinearAlgebra.Matrix.Defs
@@ -5,6 +9,8 @@ import Mathlib.LinearAlgebra.Matrix.Reindex
 import Mathlib.Algebra.Star.StarAlgHom
 import Mathlib.RingTheory.MatrixAlgebra
 import Mathlib.RingTheory.TensorProduct.Basic
+-/
+
 
 
 
@@ -48,7 +54,7 @@ noncomputable def amplify
     A (1 : Matrix k k 𝕜))
 
 
-lemma amplify_assoc
+lemma amplify_alg_assoc
   (n k k2 : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
   [Fintype k2] [DecidableEq k2] :
   ((Matrix.reindexAlgEquiv 𝕜 𝕜 (Equiv.prodAssoc n k k2)).toAlgHom).comp
@@ -83,3 +89,47 @@ lemma amplify_injective
     congrArg (fun f => f (i, d) (j, d)) h
   simp only [amplify_apply_apply, ↓reduceIte] at h'
   exact h'
+
+
+
+namespace Matrix
+
+section StarAlg
+
+variable {n m : Type*} [Fintype n] [DecidableEq n] [Fintype m] [DecidableEq m]
+variable (R A : Type*) [CommSemiring R] [Semiring A] [Star A] [Algebra R A]
+
+/-- For square matrices with coefficients in a star algebra over a commutative semiring, the natural
+map that reindexes a matrix's rows and columns with equivalent types,
+`Matrix.reindex`, is an equivalence of star algebras. -/
+def reindexStarAlgEquiv (e : m ≃ n) : Matrix m m A ≃⋆ₐ[R] Matrix n n A :=
+  {(Matrix.reindexAlgEquiv R A e).toRingEquiv with
+    toFun := reindex e e
+    map_smul' :=  by
+      intro r M
+      ext i j
+      rfl
+    map_star' := by
+      intro M
+      ext i j
+      rfl
+  }
+
+@[simp] theorem reindexStarAlgEquiv_apply (e : m ≃ n) (M : Matrix m m A) :
+    reindexStarAlgEquiv R A e M = Matrix.reindex e e M :=
+  rfl
+
+end StarAlg
+
+end Matrix
+
+
+lemma amplify_assoc
+  (n k k2 : Type*) [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
+  [Fintype k2] [DecidableEq k2] :
+  ((Matrix.reindexStarAlgEquiv 𝕜 𝕜 (Equiv.prodAssoc n k k2)) : _ →⋆ₐ[𝕜] _ ).comp
+    ((amplify (n × k) k2).comp (amplify n k)) =
+  (amplify n (k × k2)) := by
+  ext A
+  have h := Matrix.kronecker_assoc A (1 : Matrix k k 𝕜) (1 : Matrix k2 k2 𝕜)
+  simp [amplify_apply, h]
