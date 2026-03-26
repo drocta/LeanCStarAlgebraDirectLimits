@@ -163,11 +163,7 @@ variable [∀ i, Algebra R (G i)] [∀ i j h, AlgHomClass (T h) R (G i) (G j)]
 
 -- variable [SMul R (DirectLimit G f)]
 
-
-
-
-noncomputable instance : Algebra R (DirectLimit G f) where
-  algebraMap := {
+noncomputable def algebraMapAux : R →+* DirectLimit G f :={
     toFun := fun r => ⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧
     map_one' := by
       simp only [algebraMap]
@@ -185,9 +181,19 @@ noncomputable instance : Algebra R (DirectLimit G f) where
       simp only [algebraMap, map_zero]
       exact zero_def (f:=f) (Classical.arbitrary ι)
   }
+
+omit [∀ (i j : ι) (h : i ≤ j), AlgHomClass (T h) R (G i) (G j)] in
+lemma algebraMapAux_def (r : R) :
+    algebraMapAux (R:=R) r
+      = (⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧ : DirectLimit G f) :=
+      rfl
+
+
+noncomputable instance : Algebra R (DirectLimit G f) where
+  algebraMap := algebraMapAux
   commutes' := by
     intro r x
-    simp only [RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
+    rw [algebraMapAux_def]
     induction x using DirectLimit.induction with
       |ih i y =>
        let j := Classical.arbitrary ι
@@ -198,9 +204,7 @@ noncomputable instance : Algebra R (DirectLimit G f) where
        rw [mul_def, mul_def]
        let y' := (f i k hik) y
        rw [AlgHomClass.commutes]
-       have h : algebraMap (R:=R) (A := G k) r * y' = y' * algebraMap (R:=R) (A := G k) r :=
-         Algebra.commutes' (R := R) (A := G k) r y'
-       rw [h]
+       rw [Algebra.commutes (R:=R) (A := G k) r y']
 
   smul_def' := by
     intro r x
@@ -208,19 +212,18 @@ noncomputable instance : Algebra R (DirectLimit G f) where
       |ih i y =>
         rw [smul_def]
         let j := Classical.arbitrary ι
-        simp only [RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
+        rw [algebraMapAux_def]
         obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
         have r_eq_r' := of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
         have x_eq_x' := of_eq_of_le (f := f) i k hik y
         have rx_eq_rx' := of_eq_of_le (f := f) i k hik (r • y)
         rw [r_eq_r', x_eq_x', rx_eq_rx']
         rw [mul_def, Algebra.smul_def']
-        have h2 := map_mul (f := (f i k hik)) (Algebra.algebraMap r) y
-        rw [h2]
-        have h3 : ∀ ℓ, (algebraMap R (G ℓ)) r = (Algebra.algebraMap (R:=R) (A := G ℓ)) r := by
+        rw [map_mul (f := (f i k hik)) (Algebra.algebraMap r) y]
+        have h : ∀ ℓ, (algebraMap R (G ℓ)) r = (Algebra.algebraMap (R:=R) (A := G ℓ)) r := by
           intro ℓ
           rfl
-        rw [← h3, AlgHomClass.commutes, AlgHomClass.commutes]
+        rw [← h, AlgHomClass.commutes, AlgHomClass.commutes]
 
 
 end Algebra
