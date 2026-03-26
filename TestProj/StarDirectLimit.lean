@@ -91,8 +91,58 @@ instance : StarAddMonoid (DirectLimit G f) where
 
 end StarAddMonoid
 
+section StarRing
 
+variable [∀ i, NonUnitalNonAssocSemiring (G i)] [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
+variable [∀ i, StarRing (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [Nonempty ι]
+instance : StarRing (DirectLimit G f) where
+  star_mul := by
+    intro r s
+    induction r using DirectLimit.induction with
+    | ih i x => induction s using DirectLimit.induction with
+      | ih j y =>
+        obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+        have star_r_eq_star_r' := of_eq_of_le (f := f) i k hik (star x)
+        have star_s_eq_star_s' := of_eq_of_le (f := f) j k hjk (star y)
+        have r_eq_r' := of_eq_of_le (f := f) i k hik x
+        have s_eq_s' := of_eq_of_le (f := f) j k hjk y
+        rw [star_def, star_def]
+        rw [star_r_eq_star_r', star_s_eq_star_s', s_eq_s', r_eq_r']
+        rw [mul_def, mul_def, map_star, map_star]
+        rw [← star_mul, ← star_def]
+  star_add := by
+    intro r s
+    induction r using DirectLimit.induction with
+    | ih i x => induction s using DirectLimit.induction with
+      | ih j y =>
+        obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+        have star_r_eq_star_r' := of_eq_of_le (f := f) i k hik (star x)
+        have star_s_eq_star_s' := of_eq_of_le (f := f) j k hjk (star y)
+        have r_eq_r' := of_eq_of_le (f := f) i k hik x
+        have s_eq_s' := of_eq_of_le (f := f) j k hjk y
+        rw [star_def, star_def]
+        rw [star_r_eq_star_r', star_s_eq_star_s', s_eq_s', r_eq_r']
+        rw [add_def, add_def, map_star, map_star]
+        rw [← star_add, ← star_def]
+end StarRing
 
+section StarModule
+
+variable {R : Type*} [Semiring R] [Star R]
+variable [∀ i, Star (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [∀ i, SMul R (G i)] [∀ i j h, MulActionHomClass (T h) R (G i) (G j)]
+variable [∀ i, AddZero (G i)]
+variable [∀ i, StarModule R (G i)] [∀ i j h, AddMonoidHomClass (T h) (G i) (G j)]
+
+instance : StarModule R (DirectLimit G f) where
+  star_smul := by
+    intro r
+    apply DirectLimit.induction
+    intro i x
+    rw [star_def, smul_def, smul_def, ← star_smul, star_def]
+
+end StarModule
 
 
 end DirectLimit
