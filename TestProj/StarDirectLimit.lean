@@ -1,5 +1,7 @@
 import Mathlib.Algebra.Colimit.DirectLimit
 import Mathlib.Algebra.Star.Basic
+import Mathlib.Algebra.Algebra.Defs
+import Mathlib.Algebra.Algebra.Hom
 
 namespace DirectLimit
 
@@ -144,5 +146,70 @@ instance : StarModule R (DirectLimit G f) where
 
 end StarModule
 
+
+
+section Algebra
+--variable {ι : Type*} [Preorder ι] {G : ι → Type*}
+--variable {T : ∀ ⦃i j : ι⦄, i ≤ j → Type*} {f : ∀ _ _ h, T h}
+--variable [∀ i j (h : i ≤ j), FunLike (T h) (G i) (G j)] [DirectedSystem G (f · · ·)]
+--variable [IsDirectedOrder ι]
+variable [Nonempty ι]
+
+variable {R : Type*} [CommSemiring R]
+variable [∀ i, Ring (G i)] [∀ i j h, RingHomClass (T h) (G i) (G j)]
+variable [∀ i, Algebra R (G i)] [∀ i j h, AlgHomClass (T h) R (G i) (G j)]
+
+#synth Ring (DirectLimit G f)
+
+-- variable [SMul R (DirectLimit G f)]
+
+
+
+
+instance : Algebra R (DirectLimit G f) where
+  algebraMap := {
+    toFun := fun r => ⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧
+    map_one' := by
+      simp only [algebraMap]
+      rw [RingHom.map_one]
+      rfl
+    map_mul' := by
+      intro r s
+      simp only [algebraMap]
+      rw [mul_def]
+      simp only [map_mul]
+    map_add' := by
+      intro r s
+      simp only [algebraMap, add_def, map_add]
+    map_zero' := by
+      simp only [algebraMap, map_zero]
+      exact zero_def (f:=f) (Classical.arbitrary ι)
+  }
+  commutes' := by
+    intro r x
+    simp only [RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
+    induction x using DirectLimit.induction with
+      |ih i y =>
+       let j := Classical.arbitrary ι
+       obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+       have x_eq_x' := of_eq_of_le (f := f) i k hik y
+       have r_eq_r' := of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
+       rw [x_eq_x', r_eq_r']
+       rw [mul_def, mul_def]
+       let z := (algebraMap R (G j) r)
+       let y' := (f i k hik) y
+       let z' := (f j k hjk) z
+       have h := AlgHomClass.commutes (F := T hjk) (R:=R) (f j k hjk) r
+       rw [h]
+       --above two lines can be just rw [AlgHomClass.commutes]
+       change (⟦⟨k, (algebraMap R (G k)) r * y'⟩⟧: DirectLimit G f) = ⟦⟨k, y' * (algebraMap R (G k)) r⟩⟧
+       have h2 := Algebra.commutes' (R := R) (A := G k) r y'
+       have h3 : algebraMap (R:=R) (A := G k) r * y' = y' * algebraMap (R:=R) (A := G k) r := h2
+       rw [h3]
+
+  smul_def' := by
+    sorry
+
+end Algebra
 
 end DirectLimit
