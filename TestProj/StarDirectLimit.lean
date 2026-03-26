@@ -213,24 +213,19 @@ noncomputable instance : Algebra R (DirectLimit G f) where
       |ih i y =>
         rw [smul_def]
         let j := Classical.arbitrary ι
-        --have jrfl : Classical.arbitrary ι = j := rfl
         simp only [RingHom.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk]
         obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
         have r_eq_r' := of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
         have x_eq_x' := of_eq_of_le (f := f) i k hik y
         have rx_eq_rx' := of_eq_of_le (f := f) i k hik (r • y)
         rw [r_eq_r', x_eq_x', rx_eq_rx']
-        rw [mul_def]
-        rw [Algebra.smul_def']
+        rw [mul_def, Algebra.smul_def']
         have h2 := map_mul (f := (f i k hik)) (Algebra.algebraMap r) y
         rw [h2]
-        --have h3 : (f i k hik) ((Algebra.algebraMap (R:=R) (A:= G i)) r) = (Algebra.algebraMap) r :=
-        --  AlgHomClass.commutes (R:=R) (f := f i k hik) r
-        --have h4 : (algebraMap R (G k)) r = (Algebra.algebraMap (R:=R) (A := G k)) r := rfl
-        have h5 : ∀ ℓ, (algebraMap R (G ℓ)) r = (Algebra.algebraMap (R:=R) (A := G ℓ)) r := by
+        have h3 : ∀ ℓ, (algebraMap R (G ℓ)) r = (Algebra.algebraMap (R:=R) (A := G ℓ)) r := by
           intro ℓ
           rfl
-        rw [← h5, AlgHomClass.commutes, AlgHomClass.commutes]
+        rw [← h3, AlgHomClass.commutes, AlgHomClass.commutes]
 
 
 end Algebra
