@@ -196,16 +196,11 @@ noncomputable instance : Algebra R (DirectLimit G f) where
        have r_eq_r' := of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
        rw [x_eq_x', r_eq_r']
        rw [mul_def, mul_def]
-       let z := (algebraMap R (G j) r)
        let y' := (f i k hik) y
-       let z' := (f j k hjk) z
-       have h := AlgHomClass.commutes (F := T hjk) (R:=R) (f j k hjk) r
+       rw [AlgHomClass.commutes]
+       have h : algebraMap (R:=R) (A := G k) r * y' = y' * algebraMap (R:=R) (A := G k) r :=
+         Algebra.commutes' (R := R) (A := G k) r y'
        rw [h]
-       --above two lines can be just rw [AlgHomClass.commutes]
-       change (⟦⟨k, (algebraMap R (G k)) r * y'⟩⟧: DirectLimit G f) = ⟦⟨k, y' * (algebraMap R (G k)) r⟩⟧
-       have h2 := Algebra.commutes' (R := R) (A := G k) r y'
-       have h3 : algebraMap (R:=R) (A := G k) r * y' = y' * algebraMap (R:=R) (A := G k) r := h2
-       rw [h3]
 
   smul_def' := by
     intro r x
