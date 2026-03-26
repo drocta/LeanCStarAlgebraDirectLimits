@@ -64,4 +64,35 @@ instance : StarMul (DirectLimit G f) where
 
 end StarMul
 
+section StarAddMonoid
+
+variable [∀ i, AddMonoid (G i)] [∀ i j h, AddMonoidHomClass (T h) (G i) (G j)]
+variable [∀ i, StarAddMonoid (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
+
+/- we need [Nonempty ι] in order to be able to synthesize an instance of AddMonoid
+using DirectLimit.instAddMonoid-/
+variable [Nonempty ι]
+
+instance : StarAddMonoid (DirectLimit G f) where
+  star_add := by
+    intro r s
+    induction r using DirectLimit.induction with
+    | ih i x => induction s using DirectLimit.induction with
+      | ih j y =>
+        obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+        have star_r_eq_star_r' := of_eq_of_le (f := f) i k hik (star x)
+        have star_s_eq_star_s' := of_eq_of_le (f := f) j k hjk (star y)
+        have r_eq_r' := of_eq_of_le (f := f) i k hik x
+        have s_eq_s' := of_eq_of_le (f := f) j k hjk y
+        rw [star_def, star_def]
+        rw [star_r_eq_star_r', star_s_eq_star_s', s_eq_s', r_eq_r']
+        rw [add_def, add_def, map_star, map_star]
+        rw [← star_add, ← star_def]
+
+end StarAddMonoid
+
+
+
+
+
 end DirectLimit
