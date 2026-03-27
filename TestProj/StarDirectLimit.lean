@@ -225,6 +225,78 @@ noncomputable instance : Algebra R (DirectLimit G f) where
           rfl
         rw [← h, AlgHomClass.commutes, AlgHomClass.commutes]
 
+namespace Algebra
+
+variable (G f) in
+noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f :=
+{(DirectLimit.Ring.of G f i) with
+  commutes' := by
+    intro r
+    rw [RingHom.toFun_eq_coe]
+    have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
+    rw [h]
+    rw [algebraMapAux_def]
+    let j := Classical.arbitrary ι
+    obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+    rw [show (DirectLimit.Ring.of G f i) (algebraMap R (G i) r)
+          = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) by rfl]
+    rw [of_eq_of_le (f := f) i k hik (algebraMap R (G i) r)]
+    rw [of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)]
+    rw [AlgHomClass.commutes, AlgHomClass.commutes]
+    /- alternatively:
+    have hi :
+      (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f)
+      = ⟦⟨k, (f i k hik) (algebraMap R (G i) r)⟩⟧ :=
+      of_eq_of_le (f := f) i k hik (algebraMap R (G i) r)
+    have hj :
+      (⟦⟨j, algebraMap R (G j) r⟩⟧ : DirectLimit G f)
+      = ⟦⟨k, (f j k hjk) (algebraMap R (G j) r)⟩⟧ :=
+      of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
+    rw [show (DirectLimit.Ring.of G f i) (algebraMap R (G i) r)
+        = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) by rfl]
+    rw [hj, hi]
+    rw [AlgHomClass.commutes, AlgHomClass.commutes]
+    -/
+
+}
+
+  /-
+      commutes' := by
+      intro r x
+      rw [algebraMapAux_def]
+      induction x using DirectLimit.induction with
+        |ih i y =>
+         let j := Classical.arbitrary ι
+         obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+         have x_eq_x' := of_eq_of_le (f := f) i k hik y
+         have r_eq_r' := of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
+         rw [x_eq_x', r_eq_r']
+         rw [mul_def, mul_def]
+         let y' := (f i k hik) y
+         rw [AlgHomClass.commutes]
+         rw [Algebra.commutes (R:=R) (A := G k) r y']
+  -/
+
+/-
+  toFun := fun x => ⟦⟨i, x⟩⟧
+  map_one' := by
+    simp only [algebraMap]
+    rw [RingHom.map_one]
+    rfl
+  map_mul' := by
+    intro x y
+    simp only [mul_def]
+  map_add' := by
+    intro x y
+    simp only [add_def, map_add]
+  map_zero' := by
+    simp only [algebraMap, map_zero]
+    exact zero_def (f:=f) i
+-/
+
+
+end Algebra
+
 
 end Algebra
 
