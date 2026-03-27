@@ -288,7 +288,8 @@ noncomputable def lift (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f 
       _ = (g i) (algMap_Gi r) := by rfl
       _ = algMap_A r := by rw [AlgHom.commutes]
 }
-
+variable (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x)
+@[simp] theorem lift_of (i x) : lift G f A g Hg (of G f i x) = g i x := rfl
 
 
 end Algebra
