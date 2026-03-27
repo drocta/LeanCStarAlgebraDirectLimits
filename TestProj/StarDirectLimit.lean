@@ -1,5 +1,6 @@
 import Mathlib.Algebra.Colimit.DirectLimit
 import Mathlib.Algebra.Star.Basic
+import Mathlib.Algebra.Star.StarRingHom
 import Mathlib.Algebra.Algebra.Defs
 import Mathlib.Algebra.Algebra.Hom
 
@@ -94,6 +95,7 @@ instance : StarAddMonoid (DirectLimit G f) where
 end StarAddMonoid
 
 section StarRing
+/- Reminder : `StarRing`s are not required to be unital. -/
 
 variable [∀ i, NonUnitalNonAssocSemiring (G i)] [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
 variable [∀ i, StarRing (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
@@ -129,6 +131,136 @@ instance : StarRing (DirectLimit G f) where
         rw [← star_add, ← star_def]
 end StarRing
 
+section UnitalStarRing
+
+/- Because I want to use the definition of `DirectLimit.Ring.of` and `DirectLimit.Ring.lift`,
+   which require a unital ring structure,
+   I am assuming that the rings in the directed system are unital,
+   and that the morphisms are unital ring homomorphisms.
+   This is despite the definition of `StarRing`, and most of the work done with `StarRing`s,
+   not requiring unitality.
+   Perhaps in the future a `DirectLimit.NonUnitalRing.of` and `DirectLimit.NonUnitalRing.lift`
+   could be added, which would allow us to drop the unitality assumptions here. -/
+
+
+variable [∀ i, NonAssocSemiring (G i)] [∀ i j h, RingHomClass (T h) (G i) (G j)]
+variable [∀ i, StarRing (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [Nonempty ι]
+
+#synth StarRing (DirectLimit G f)
+#synth NonUnitalNonAssocSemiring (DirectLimit G f)
+#synth NonAssocSemiring (DirectLimit G f)
+
+namespace UnitalStarRing
+
+
+
+
+
+variable (G f) in
+/-- The canonical map from a component to the direct limit. -/
+noncomputable def of (i) : G i →⋆ₙ+* DirectLimit G f := {
+  (DirectLimit.Ring.of G f i) with
+  map_star' := by
+    intro x
+    -- I'll want to use star_def , but I need to go from `of` to `⟦⟨i, x⟩⟧`,
+    -- so I need to show that `of i x = ⟦⟨i, x⟩⟧`
+    have hx : (Ring.of G f i).toFun x = (⟦⟨i, x⟩⟧ : DirectLimit G f) := by rfl
+    have hstarx : (Ring.of G f i).toFun (star x) = (⟦⟨i, star x⟩⟧ : DirectLimit G f) := by rfl
+    rw [hx, hstarx, star_def]
+}
+
+@[simp] lemma of_f {i j} (hij) (x) : of G f j (f i j hij x) = of G f i x := .symm <| eq_of_le ..
+
+
+
+variable (G f) in
+/-- The canonical map from a component to the direct limit. -/
+noncomputable def of2 (i) : G i →⋆ₙ+* DirectLimit G f where
+  toFun x := ⟦⟨i, x⟩⟧
+  map_mul' _ _ := (mul_def ..).symm
+  map_add' _ _ := (add_def ..).symm
+  map_zero' := (zero_def ..).symm
+  map_star' _ := (star_def ..).symm
+
+
+@[simp] lemma of2_f {i j} (hij) (x) : of2 G f j (f i j hij x) = of2 G f i x := .symm <| eq_of_le ..
+
+/- bleh -/
+structure UnitalStarRingHom (A B : Type*) [NonAssocSemiring A] [StarRing A] [NonAssocSemiring B]
+    [StarRing B] extends A →⋆ₙ+* B where
+  map_one' : toFun 1 = 1
+
+variable {A B : Type*} [NonAssocSemiring A] [StarRing A] [NonAssocSemiring B] [StarRing B] in
+instance : FunLike (UnitalStarRingHom A B) A B where
+  coe f:= f.toFun
+  coe_injective' := by rintro ⟨⟨⟨⟨f, _⟩, _⟩, _⟩, _⟩ ⟨⟨⟨⟨g, _⟩, _⟩, _⟩, _⟩ h; congr
+
+/-
+variable {A B : Type*} [NonAssocSemiring A] [StarRing A] [NonAssocSemiring B] [StarRing B] in
+theorem UnitalStarRingHom.coe_toRingHom (f : UnitalStarRingHom A B) : ⇑f.toRingHom = f :=
+  rfl
+-/
+variable {A B : Type*} [NonAssocSemiring A] [StarRing A] [NonAssocSemiring B] [StarRing B] in
+def UnitalStarRingHom.toRingHom (f : UnitalStarRingHom A B) : A →+* B := {f with}
+
+variable {A B : Type*} [NonAssocSemiring A] [StarRing A] [NonAssocSemiring B] [StarRing B] in
+instance : RingHomClass (UnitalStarRingHom A B) A B where
+  map_one f := f.map_one'
+  map_mul f  := f.map_mul'
+  map_zero f := f.map_zero'
+  map_add f := f.map_add'
+
+variable {A B : Type*} [NonAssocSemiring A] [StarRing A] [NonAssocSemiring B] [StarRing B] in
+instance : StarHomClass (UnitalStarRingHom A B) A B where
+  map_star f := f.map_star'
+
+
+variable (A : Type*) [NonAssocSemiring A] [StarRing A]
+variable (G f) in
+/-- The universal property of the direct limit: maps from the components to another ring
+that respect the directed system structure (i.e. make some diagram commute) give rise
+to a unique map out of the direct limit.
+-/
+noncomputable def lift (g : ∀ i, UnitalStarRingHom (G i) A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+    DirectLimit G f →⋆ₙ+* A :=
+  {(DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)) with
+    map_star' := DirectLimit.induction _ fun i x ↦ by
+      simp_rw [star_def]--, lift_def, map_star (g i)]
+      rw [lift_def]
+    /-
+    map_star' := by
+      intro x
+      simp only [RingHom.toMonoidHom_eq_coe, OneHom.toFun_eq_coe, MonoidHom.toOneHom_coe,
+        MonoidHom.coe_coe]
+      sorry
+    -/
+
+}
+
+variable (G f) in
+/-- The universal property of the direct limit: maps from the components to another ring
+that respect the directed system structure (i.e. make some diagram commute) give rise
+to a unique map out of the direct limit.
+-/
+noncomputable def lift2
+    (g : ∀ i, UnitalStarRingHom (G i) A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+    DirectLimit G f →⋆ₙ+* A where
+  toFun := _root_.DirectLimit.lift _ (g · ·) (fun i j hij x ↦ (Hg i j hij x).symm)
+  --map_one' := by rw [one_def (Classical.arbitrary ι), lift_def, map_one]
+  -- if we wanted a unital star ring homomorphismout, so of type `UnitalStarRingHom (DirectLimit G f) A`, we would include the above line
+  map_mul' := DirectLimit.induction₂ _ fun i x y ↦ by simp_rw [mul_def, lift_def, map_mul (g i)]
+  map_zero' := by simp_rw [zero_def (Classical.arbitrary ι), lift_def, map_zero]
+  map_add' := DirectLimit.induction₂ _ fun i x y ↦ by simp_rw [add_def, lift_def, map_add (g i)]
+  map_star' := DirectLimit.induction _ fun i x ↦ by simp_rw [star_def, lift_def, map_star (g i)]
+
+
+
+end UnitalStarRing
+
+
+end UnitalStarRing
+
 section StarModule
 
 variable {R : Type*} [Semiring R] [Star R]
@@ -163,6 +295,9 @@ variable [∀ i, Algebra R (G i)] [∀ i j h, AlgHomClass (T h) R (G i) (G j)]
 
 -- variable [SMul R (DirectLimit G f)]
 
+
+/- TODO: Perhaps all the places I use `Classical.arbitrary ι` could instead be using
+`DirectLimit.map₀` and `DirectLimit.map₀_def`-/
 noncomputable def algebraMapAux : R →+* DirectLimit G f :={
     toFun := fun r => ⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧
     map_one' := by
@@ -181,6 +316,57 @@ noncomputable def algebraMapAux : R →+* DirectLimit G f :={
       simp only [algebraMap, map_zero]
       exact zero_def (f:=f) (Classical.arbitrary ι)
   }
+
+/- an attempt at defining the algebra map via DirectLimit.map₀ , which I thought would be simpler,
+  and maybe more idiomatic, but it turned out longer,
+  perhaps because I'm not using map₀_def correctly.
+  Also, the linter is mad about how I'm dealing with multiple goals-/
+noncomputable def algebraMapAux2 :  R →+* DirectLimit G f := {
+  toFun r := DirectLimit.map₀ f (fun i => algebraMap R (G i ) r)
+  map_one' := by
+    rw [map₀_def]
+    rw [RingHom.map_one]
+    rw [one_def]
+    exact Classical.arbitrary ι
+    intro i j hij
+    rw [map_one, map_one, map_one]
+  map_mul' := by
+    intro r s
+    rw [map₀_def, map₀_def, map₀_def]
+    rw [mul_def]
+    rw [map_mul]
+    exact Classical.arbitrary ι
+    intro i j hij
+    rw [AlgHomClass.commutes]
+    intro i j hij
+    rw [AlgHomClass.commutes]
+    intro i j hij
+    rw [AlgHomClass.commutes]
+  map_zero' := by
+    rw [map₀_def]
+    rw [RingHom.map_zero]
+    rw [zero_def]
+    exact Classical.arbitrary ι
+    intro i j hij
+    rw [map_zero, map_zero, map_zero]
+  map_add' := by
+    intro r s
+    rw [map₀_def, map₀_def, map₀_def]
+    rw [add_def, map_add]
+    exact Classical.arbitrary ι
+    intro i j hij
+    rw [AlgHomClass.commutes]
+    intro i j hij
+    rw [AlgHomClass.commutes]
+    intro i j hij
+    rw [AlgHomClass.commutes]
+}
+
+
+lemma algebraMapAux2_def (r : R) :
+  algebraMapAux2 (R:=R) r
+  = (⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧ : DirectLimit G f) :=
+  rfl
 
 omit [∀ (i j : ι) (h : i ≤ j), AlgHomClass (T h) R (G i) (G j)] in
 lemma algebraMapAux_def (r : R) :
@@ -226,6 +412,25 @@ noncomputable instance : Algebra R (DirectLimit G f) where
         rw [← h, AlgHomClass.commutes, AlgHomClass.commutes]
 
 namespace Algebra
+
+variable (G f) in
+noncomputable def of2 (i : ι) : G i →ₐ[R] DirectLimit G f where
+  toFun x := ⟦⟨i, x⟩⟧
+  map_one' := (one_def i).symm
+  map_mul' _ _ := (mul_def ..).symm
+  map_add' _ _ := (add_def ..).symm
+  map_zero' := (zero_def ..).symm
+  commutes' := by
+    intro r
+    have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
+    rw [h]
+    rw [algebraMapAux_def]
+    let j := Classical.arbitrary ι
+    obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+    rw [of_eq_of_le (f := f) i k hik (algebraMap R (G i) r)]
+    rw [of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)]
+    rw [AlgHomClass.commutes, AlgHomClass.commutes]
+
 
 variable (G f) in
 noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f :=
@@ -288,6 +493,7 @@ noncomputable def lift (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f 
       _ = (g i) (algMap_Gi r) := by rfl
       _ = algMap_A r := by rw [AlgHom.commutes]
 }
+
 variable (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x)
 @[simp] theorem lift_of (i x) : lift G f A g Hg (of G f i x) = g i x := rfl
 
