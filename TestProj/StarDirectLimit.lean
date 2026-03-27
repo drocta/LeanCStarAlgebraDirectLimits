@@ -289,29 +289,6 @@ noncomputable def lift (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f 
       _ = algMap_A r := by rw [AlgHom.commutes]
 }
 
-/-
-    calc
-      DirectLimit.Ring.lift G f A (g := fun i => (g i).toRingHom) (Hg := Hg)
-          (algebraMap R (DirectLimit G f) r)
-          = DirectLimit.Ring.lift G f A (g := fun i => (g i).toRingHom) (Hg := Hg)
-              ((DirectLimit.Algebra.of G f i) (algebraMap R (G i) r)) := by
-
-
-    have h : (DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)).toFun = _root_.DirectLimit.lift _ (g · ·) fun i j h x ↦ (Hg i j h x).symm := rfl
-    let foo := _root_.DirectLimit.lift _ (g · ·) fun i j h x ↦ (Hg i j h x).symm
-    intro r
-    --rw [RingHom.toFun_eq_coe]
-    rw [h]
-    have Hg2 : ∀ i j hij x, (g i).toRingHom x = (g j).toRingHom (f i j hij x) := by
-      intro i j hij x
-      simp [Hg]
-    have h2 := lift_def (F:=G) f (fun i => (g i).toRingHom) Hg2
-    rw [h2]
-    rw [lift_def]
-    simp
-    sorry
--/
-
 
 
 end Algebra
