@@ -233,23 +233,31 @@ noncomputable def algebraMapAux2 :  R →+* DirectLimit G f := {
   toFun r := DirectLimit.map₀ f (fun i => algebraMap R (G i ) r)
   map_one' := by
     rw [map₀_def]
-    rw [RingHom.map_one]
-    rw [one_def]
-    exact Classical.arbitrary ι
-    intro i j hij
-    rw [map_one, map_one, map_one]
+    · --first goal
+      rw [RingHom.map_one]
+      rw [one_def]
+      exact Classical.arbitrary ι
+    · --second goal: compatibility between the directed system maps and the algebra maps
+      intro i j hij
+      rw [map_one, map_one, map_one]
   map_mul' := by
     intro r s
     rw [map₀_def, map₀_def, map₀_def]
-    rw [mul_def]
-    rw [map_mul]
-    exact Classical.arbitrary ι
-    intro i j hij
-    rw [AlgHomClass.commutes]
-    intro i j hij
-    rw [AlgHomClass.commutes]
-    intro i j hij
-    rw [AlgHomClass.commutes]
+    · --first goal
+      rw [mul_def]
+      · --subgoal
+        rw [map_mul]
+      · --subgoal : entry from ι
+        exact Classical.arbitrary ι
+    · --first instance of the compatibility goal
+      intro i j hij
+      rw [AlgHomClass.commutes]
+    · --second instance of the compatibility goal
+      intro i j hij
+      rw [AlgHomClass.commutes]
+    · --third instance of the compatibility goal
+      intro i j hij
+      rw [AlgHomClass.commutes]
   map_zero' := by
     rw [map₀_def]
     rw [RingHom.map_zero]
