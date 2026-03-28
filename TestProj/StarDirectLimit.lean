@@ -402,6 +402,37 @@ noncomputable def lift (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f 
       _ = algMap_A r := by rw [AlgHom.commutes]
 }
 
+
+variable (G f) in
+/-- The universal property of the direct limit: maps from the components to another R-algebra
+that respect the directed system structure (i.e. make some diagram commute) give rise
+to a unique map out of the direct limit.
+-/
+noncomputable def lift2 (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+    DirectLimit G f →ₐ[R] A where
+  toFun := _root_.DirectLimit.lift _ (g · ·) fun i j h x ↦ (Hg i j h x).symm
+  map_one' := by rw [one_def (Classical.arbitrary ι), lift_def, map_one]
+  map_mul' := DirectLimit.induction₂ _ fun i x y ↦ by simp_rw [mul_def, lift_def, map_mul]
+  map_zero' := by simp_rw [zero_def (Classical.arbitrary ι), lift_def, map_zero]
+  map_add' := DirectLimit.induction₂ _ fun i x y ↦ by simp_rw [add_def, lift_def, map_add]
+  commutes' := by
+    let i := Classical.arbitrary ι
+    intro r
+    let of := Algebra.of G f i
+    let ring_of := of.toRingHom
+    let algMap_limit := algebraMap R (DirectLimit G f)
+    let algMap_Gi := algebraMap R (G i)
+    let algMap_A := algebraMap R A
+    let lift := DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)
+    have lift_of : lift (ring_of (algMap_Gi r)) = (g i).toRingHom (algMap_Gi r) :=
+      DirectLimit.Ring.lift_of A (g:= fun i => (g i).toRingHom) Hg i (algMap_Gi r)
+    calc
+      lift (algMap_limit r) = lift (of (algMap_Gi r)) := by rw [AlgHom.commutes]
+      _ = lift (ring_of (algMap_Gi r)) := by rfl
+      _ = (g i).toRingHom (algMap_Gi r) := lift_of
+      _ = (g i) (algMap_Gi r) := by rfl
+      _ = algMap_A r := by rw [AlgHom.commutes]
+
 variable (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x)
 @[simp] theorem lift_of (i x) : lift G f A g Hg (of G f i x) = g i x := rfl
 
