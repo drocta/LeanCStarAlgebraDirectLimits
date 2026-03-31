@@ -187,12 +187,10 @@ instance : StarModule R (DirectLimit G f) where
 end StarModule
 
 
-
+-- TODO: add support for non-unital algebras
+-- TODO: Consider adding DirectLimit.algebraMap_def, to simplify some of the proofs in this section.
 section Algebra
---variable {ι : Type*} [Preorder ι] {G : ι → Type*}
---variable {T : ∀ ⦃i j : ι⦄, i ≤ j → Type*} {f : ∀ _ _ h, T h}
---variable [∀ i j (h : i ≤ j), FunLike (T h) (G i) (G j)] [DirectedSystem G (f · · ·)]
---variable [IsDirectedOrder ι]
+
 variable [Nonempty ι]
 
 variable {R : Type*} [CommSemiring R]
@@ -447,5 +445,55 @@ end Algebra
 
 
 end Algebra
+
+
+
+section StarAlgebra
+
+variable {R : Type*} [CommSemiring R] [StarRing R]
+variable [∀ i, Semiring (G i)]
+variable [∀ i, StarRing (G i)]
+variable [∀ i, Algebra R (G i)]
+variable [∀ i, StarModule R (G i)]
+variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [∀ i j h, AlgHomClass (T h) R (G i) (G j)]
+variable [∀ i j h, MulActionHomClass (T h) R (G i) (G j)]
+
+variable [Nonempty ι]
+
+
+#synth Star (DirectLimit G f)
+#synth StarModule R (DirectLimit G f)
+#synth StarRing (DirectLimit G f)
+#synth Semiring (DirectLimit G f)
+#synth Algebra R (DirectLimit G f)
+
+end StarAlgebra
+
+
+section NonUnitalStarAlgebra
+
+
+variable {R : Type*} [CommSemiring R] [StarRing R]
+variable [∀ i, NonUnitalNonAssocSemiring (G i)]
+variable [∀ i, StarRing (G i)]
+variable [∀ i, DistribMulAction R (G i)]
+variable [∀ i, StarModule R (G i)]
+variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
+variable [∀ i j h, MulActionHomClass (T h) R (G i) (G j)]
+
+variable [Nonempty ι]
+
+
+#synth Star (DirectLimit G f)
+#synth StarModule R (DirectLimit G f)
+#synth NonUnitalNonAssocSemiring (DirectLimit G f)
+#synth StarRing (DirectLimit G f)
+#synth SMul R (DirectLimit G f)
+
+
+end NonUnitalStarAlgebra
+
 
 end DirectLimit
