@@ -24,15 +24,30 @@ instance instNorm : Norm (DirectLimit G f) where
 
 example (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
     Norm (DirectLimit G f) := by
-  letI := instNorm (f := f) hnorm
+  letI := instNorm hnorm
   infer_instance
 
 
-lemma norm_def (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) (i : ι) (x : G i) :
+lemma norm_def0 (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) (i : ι) (x : G i) :
     @Norm.norm _ (instNorm hnorm) (⟦⟨i, x⟩⟧ : DirectLimit G f) = ‖(x : G i)‖ := by
   simpa using (lift_def f (ih := fun i x => ‖ (x : G i)‖) hnorm ⟨i, x⟩)
 
+lemma norm_def (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) (i : ι) (x : G i) :
+    letI : Norm (DirectLimit G f) := instNorm hnorm
+    ‖ (⟦⟨i, x⟩⟧ : DirectLimit G f)‖ = ‖(x : G i)‖ := by
+  simpa using (lift_def f (ih := fun i x => ‖ (x : G i)‖) hnorm ⟨i, x⟩)
 
+
+
+lemma norm_lift {α : Type*} [Norm α] (hnorm) (g : ∀ i, G i → α)
+    (Hg : ∀ i j h x, (g i x = g j ((f i j h) x)))
+    (hg_norm : ∀ i x, ‖g i x‖ = ‖(x : G i)‖) :
+    letI : Norm (DirectLimit G f) := instNorm hnorm
+    (∀ z : DirectLimit G f, ‖DirectLimit.lift f g Hg z‖ = ‖z‖) := by
+  apply DirectLimit.induction
+  intro i x
+  rw [lift_def, norm_def]
+  simp only [hg_norm]
 
 end norm
 
