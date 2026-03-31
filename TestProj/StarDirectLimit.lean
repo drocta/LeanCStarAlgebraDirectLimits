@@ -196,12 +196,10 @@ section Algebra
 variable [Nonempty ι]
 
 variable {R : Type*} [CommSemiring R]
-variable [∀ i, Ring (G i)] [∀ i j h, RingHomClass (T h) (G i) (G j)]
+variable [∀ i, Semiring (G i)] [∀ i j h, RingHomClass (T h) (G i) (G j)]
 variable [∀ i, Algebra R (G i)] [∀ i j h, AlgHomClass (T h) R (G i) (G j)]
 
-#synth Ring (DirectLimit G f)
 
--- variable [SMul R (DirectLimit G f)]
 
 
 /- TODO: Perhaps all the places I use `Classical.arbitrary ι` could instead be using
