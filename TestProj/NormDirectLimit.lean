@@ -17,7 +17,7 @@ variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
 -- variable [∀ i j h, Isometry (f i j h : G i → G j)]
 
 instance instNorm : Norm (DirectLimit G f) where
-  norm := DirectLimit.lift f (ih := fun i x => ‖ (x : G i)‖) hnorm --(fun _ _ _ _ => (hnorm _ _ _ _).symm)
+  norm := DirectLimit.lift f (ih := fun i x => ‖ (x : G i)‖) hnorm
 
 #synth Norm (DirectLimit G f)
 #check instNorm hnorm
@@ -30,8 +30,7 @@ example (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
 
 lemma norm_def (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) (i : ι) (x : G i) :
     @Norm.norm _ (instNorm hnorm) (⟦⟨i, x⟩⟧ : DirectLimit G f) = ‖(x : G i)‖ := by
-  have h := lift_def f (ih := fun i x => ‖ (x : G i)‖) hnorm ⟨i, x⟩
-  simpa [h]
+  simpa using (lift_def f (ih := fun i x => ‖ (x : G i)‖) hnorm ⟨i, x⟩)
 
 
 
