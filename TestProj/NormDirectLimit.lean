@@ -12,36 +12,34 @@ variable [IsDirectedOrder ι]
 
 section norm
 
-variable [∀ i, Norm (G i)] --[∀ i j h, NormHomClass (T h) (G i) (G j)]
-variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+variable [∀ i, Norm (G i)]
 
-instance instNorm : Norm (DirectLimit G f) where
-  norm := DirectLimit.lift f (ih := fun i x => ‖ (x : G i)‖) hnorm
+variable (G f) in
+class NormCompat : Prop where
+  norm_compat : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖
 
--- #synth Norm (DirectLimit G f)
-#check instNorm hnorm
+variable [NormCompat G f]
 
-example (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
+instance instNorm [hnorm : NormCompat G f] : Norm (DirectLimit G f) where
+  norm := DirectLimit.lift f (ih := fun i x => ‖ (x : G i)‖) hnorm.norm_compat
+
+#synth Norm (DirectLimit G f)
+#check instNorm
+
+
+example :
     Norm (DirectLimit G f) := by
-  letI := instNorm hnorm
   infer_instance
 
 
-lemma norm_def0 (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) (i : ι) (x : G i) :
-    @Norm.norm _ (instNorm hnorm) (⟦⟨i, x⟩⟧ : DirectLimit G f) = ‖(x : G i)‖ := by
-  simpa using (lift_def f (ih := fun i x => ‖ (x : G i)‖) hnorm ⟨i, x⟩)
-
-lemma norm_def (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) (i : ι) (x : G i) :
-    letI : Norm (DirectLimit G f) := instNorm hnorm
-    ‖ (⟦⟨i, x⟩⟧ : DirectLimit G f)‖ = ‖(x : G i)‖ := by
-  simpa using (lift_def f (ih := fun i x => ‖ (x : G i)‖) hnorm ⟨i, x⟩)
+lemma norm_def (i : ι) (x : G i) : ‖ (⟦⟨i, x⟩⟧ : DirectLimit G f)‖ = ‖(x : G i)‖ := by
+  simpa using (lift_def f (ih := fun i x => ‖(x : G i)‖) NormCompat.norm_compat ⟨i, x⟩)
 
 
 
-lemma norm_lift {α : Type*} [Norm α] (hnorm) (g : ∀ i, G i → α)
+lemma norm_lift {α : Type*} [Norm α] (g : ∀ i, G i → α)
     (Hg : ∀ i j h x, (g i x = g j ((f i j h) x)))
     (hg_norm : ∀ i x, ‖g i x‖ = ‖(x : G i)‖) :
-    letI : Norm (DirectLimit G f) := instNorm hnorm
     (∀ z : DirectLimit G f, ‖DirectLimit.lift f g Hg z‖ = ‖z‖) := by
   apply DirectLimit.induction
   intro i x
@@ -57,16 +55,13 @@ section NormedAddGroup
 variable [Nonempty ι]
 
 variable [∀ i, NormedAddGroup (G i)]
-variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+variable [NormCompat G f]
 variable [∀ i j h, AddMonoidHomClass (T h) (G i) (G j)]
 
 set_option diagnostics true in
 #synth AddGroup (DirectLimit G f)
 
-noncomputable instance instMetricSpaceOfNormedAddGroup
-    (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
-    MetricSpace (DirectLimit G f) := by
-  letI : Norm (DirectLimit G f) := instNorm hnorm
+noncomputable instance instMetricSpaceOfNormedAddGroup : MetricSpace (DirectLimit G f) := by
   exact {
     dist := fun x y => ‖x - y‖
     dist_self := by
@@ -96,15 +91,9 @@ noncomputable instance instMetricSpaceOfNormedAddGroup
       rw [h']
   }
 
-noncomputable instance instNormedAddGroup
-    (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
-    NormedAddGroup (DirectLimit G f) := by
-  letI := instNorm hnorm
-  letI := instMetricSpaceOfNormedAddGroup hnorm
-  exact {}
+noncomputable instance instNormedAddGroup : NormedAddGroup (DirectLimit G f) where
 
-
-#check instNormedAddGroup hnorm
+#synth NormedAddGroup (DirectLimit G f)
 
 
 end NormedAddGroup
@@ -115,18 +104,15 @@ section NormedAddCommGroup
 variable [Nonempty ι]
 
 variable [∀ i, NormedAddCommGroup (G i)]
-variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+variable [NormCompat G f]
 variable [∀ i j h, AddMonoidHomClass (T h) (G i) (G j)]
 
 
-noncomputable instance instNormedAddCommGroup
-    (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
-    NormedAddCommGroup (DirectLimit G f) := by
-  letI := instNorm hnorm
-  letI := instMetricSpaceOfNormedAddGroup hnorm
-  exact {}
+noncomputable instance instNormedAddCommGroup : NormedAddCommGroup (DirectLimit G f) where
 
-#check instNormedAddCommGroup hnorm
+
+#check instNormedAddCommGroup
+#synth NormedAddCommGroup (DirectLimit G f)
 
 end NormedAddCommGroup
 
