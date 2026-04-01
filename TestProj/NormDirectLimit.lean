@@ -82,7 +82,9 @@ noncomputable instance instMetricSpaceOfNormedAddGroup
     dist_triangle := by
       apply DirectLimit.induction₃ (C := fun x y z => ‖x - z‖ ≤ ‖x - y‖ + ‖y - z‖)
       intro i x y z
+      -- shorter to say `simp only [sub_def, norm_def]`, but unsure if better
       rw [sub_def, sub_def, sub_def, norm_def, norm_def, norm_def]
+      -- shorter to say `simp only [← NormedAddGroup.dist_eq]`, but unsure if better
       rw [← NormedAddGroup.dist_eq, ← NormedAddGroup.dist_eq, ← NormedAddGroup.dist_eq]
       apply dist_triangle
     eq_of_dist_eq_zero := by
@@ -94,7 +96,7 @@ noncomputable instance instMetricSpaceOfNormedAddGroup
       rw [h']
   }
 
-noncomputable instance instNormedAddGroupOfNormedAddGroup
+noncomputable instance instNormedAddGroup
     (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
     NormedAddGroup (DirectLimit G f) := by
   letI := instNorm hnorm
@@ -102,7 +104,7 @@ noncomputable instance instNormedAddGroupOfNormedAddGroup
   exact {}
 
 
-#check instNormedAddGroupOfNormedAddGroup hnorm
+#check instNormedAddGroup hnorm
 
 
 end NormedAddGroup
@@ -117,14 +119,14 @@ variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
 variable [∀ i j h, AddMonoidHomClass (T h) (G i) (G j)]
 
 
-noncomputable instance instNormedAddCommGroupOfNormedAddCommGroup
+noncomputable instance instNormedAddCommGroup
     (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖) :
     NormedAddCommGroup (DirectLimit G f) := by
   letI := instNorm hnorm
   letI := instMetricSpaceOfNormedAddGroup hnorm
   exact {}
 
-#check instNormedAddCommGroupOfNormedAddCommGroup hnorm
+#check instNormedAddCommGroup hnorm
 
 end NormedAddCommGroup
 
