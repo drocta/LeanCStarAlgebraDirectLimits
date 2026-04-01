@@ -248,23 +248,25 @@ lemma algebraMapAux_def (r : R) :
       = (⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧ : DirectLimit G f) :=
       rfl
 
+lemma algebraMapAux_at (i : ι) (r : R) :
+    algebraMapAux (R:=R) r
+      = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) := by
+  let j := Classical.arbitrary ι
+  rw [algebraMapAux_def]
+  obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+  rw [of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)]
+  rw [of_eq_of_le (f := f) i k hik (algebraMap R (G i) r)]
+  rw [AlgHomClass.commutes, AlgHomClass.commutes]
+
+
 
 noncomputable instance : Algebra R (DirectLimit G f) where
   algebraMap := algebraMapAux
   commutes' := by
     intro r x
-    rw [algebraMapAux_def]
     induction x using DirectLimit.induction with
       |ih i y =>
-       let j := Classical.arbitrary ι
-       obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
-       have x_eq_x' := of_eq_of_le (f := f) i k hik y
-       have r_eq_r' := of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
-       rw [x_eq_x', r_eq_r']
-       rw [mul_def, mul_def]
-       let y' := (f i k hik) y
-       rw [AlgHomClass.commutes]
-       rw [Algebra.commutes (R:=R) (A := G k) r y']
+        rw [algebraMapAux_at i, mul_def, mul_def, Algebra.commutes]
 
   smul_def' := by
     intro r x
@@ -272,18 +274,8 @@ noncomputable instance : Algebra R (DirectLimit G f) where
       |ih i y =>
         rw [smul_def]
         let j := Classical.arbitrary ι
-        rw [algebraMapAux_def]
-        obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
-        have r_eq_r' := of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
-        have x_eq_x' := of_eq_of_le (f := f) i k hik y
-        have rx_eq_rx' := of_eq_of_le (f := f) i k hik (r • y)
-        rw [r_eq_r', x_eq_x', rx_eq_rx']
-        rw [mul_def, Algebra.smul_def']
-        rw [map_mul (f := (f i k hik)) (Algebra.algebraMap r) y]
-        have h : ∀ ℓ, (algebraMap R (G ℓ)) r = (Algebra.algebraMap (R:=R) (A := G ℓ)) r := by
-          intro ℓ
-          rfl
-        rw [← h, AlgHomClass.commutes, AlgHomClass.commutes]
+        rw [algebraMapAux_at i, mul_def, Algebra.smul_def']
+        rfl
 
 namespace Algebra
 
@@ -298,12 +290,7 @@ noncomputable def of2 (i : ι) : G i →ₐ[R] DirectLimit G f where
     intro r
     have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
     rw [h]
-    rw [algebraMapAux_def]
-    let j := Classical.arbitrary ι
-    obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
-    rw [of_eq_of_le (f := f) i k hik (algebraMap R (G i) r)]
-    rw [of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)]
-    rw [AlgHomClass.commutes, AlgHomClass.commutes]
+    rw [algebraMapAux_at i]
 
 
 variable (G f) in
@@ -314,29 +301,9 @@ noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f :=
     rw [RingHom.toFun_eq_coe]
     have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
     rw [h]
-    rw [algebraMapAux_def]
-    let j := Classical.arbitrary ι
-    obtain ⟨k, hik, hjk⟩ := directed_of (α := ι) (· ≤ ·) i j
+    rw [algebraMapAux_at i]
     rw [show (DirectLimit.Ring.of G f i) (algebraMap R (G i) r)
           = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) by rfl]
-    rw [of_eq_of_le (f := f) i k hik (algebraMap R (G i) r)]
-    rw [of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)]
-    rw [AlgHomClass.commutes, AlgHomClass.commutes]
-    /- alternatively:
-    have hi :
-      (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f)
-      = ⟦⟨k, (f i k hik) (algebraMap R (G i) r)⟩⟧ :=
-      of_eq_of_le (f := f) i k hik (algebraMap R (G i) r)
-    have hj :
-      (⟦⟨j, algebraMap R (G j) r⟩⟧ : DirectLimit G f)
-      = ⟦⟨k, (f j k hjk) (algebraMap R (G j) r)⟩⟧ :=
-      of_eq_of_le (f := f) j k hjk (algebraMap R (G j) r)
-    rw [show (DirectLimit.Ring.of G f i) (algebraMap R (G i) r)
-        = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) by rfl]
-    rw [hj, hi]
-    rw [AlgHomClass.commutes, AlgHomClass.commutes]
-    -/
-
 }
 
 variable (A : Type*) [Semiring A] [Algebra R A]
