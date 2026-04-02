@@ -8,21 +8,22 @@ noncomputable section
 
 open UniformSpace
 
+class UniformContinuousStar (α : Type*) [UniformSpace α] [Star α] : Prop where
+  uniformContinuous_star : UniformContinuous (star : α → α)
+
 variable {α : Type*} [UniformSpace α]
 
 section Star
 
 variable [Star α]
-variable (hstar : UniformContinuous (star : α → α))
+
 
 instance : Star (UniformSpace.Completion α) :=
   ⟨Completion.map (fun a ↦ star a : α → α)⟩
 
-#check @hstar
-
-
-lemma star_def (hstar : UniformContinuous (star : α → α)) (a : α) :
-    star (↑a : Completion α) = ↑(star a) :=  Completion.map_coe (hf := hstar) a
+lemma star_def [UniformContinuousStar α] (a : α) :
+    star (↑a : Completion α) = ↑(star a) :=
+  Completion.map_coe (hf := UniformContinuousStar.uniformContinuous_star) a
 
 
 instance : ContinuousStar (Completion α) where
@@ -33,8 +34,7 @@ end Star
 
 section InvolutiveStar
 
-variable [InvolutiveStar α]
-variable (hstar : UniformContinuous (star : α → α))
+variable [InvolutiveStar α] [UniformContinuousStar α]
 
 instance instInvolutiveStar : InvolutiveStar (UniformSpace.Completion α) where
   star_involutive := by
@@ -46,13 +46,12 @@ instance instInvolutiveStar : InvolutiveStar (UniformSpace.Completion α) where
         continuous_id
     · -- show that for each a : α, we have star (star (↑a)) = ↑a
       intro a
-      simp only [star_def hstar]
+      simp only [star_def]
       rw [star_involutive a]
-
 
 end InvolutiveStar
 
-section StarAddGroup
+section StarAddMonoid
 
 variable [AddGroup α] [StarAddMonoid α] [IsUniformAddGroup α]
 
@@ -60,44 +59,23 @@ variable [AddGroup α] [StarAddMonoid α] [IsUniformAddGroup α]
 
 #check Continuous.prodMap
 
-lemma uniformContinuous_star : UniformContinuous (star : α → α) := by
-  have h := @IsUniformAddGroup.uniformContinuous_sub α _ _ _
-  apply uniform_continuous_of_continuous
-  exact continuous_star
-
---#synth InvolutiveStar (Completion α)
-
-instance : StarAddMonoid (Completion α) := by
-  have hstar : UniformContinuous (star : α → α) := by
-    sorry
-  exact {
-    star_add := by
-      intro r s
-      apply Completion.induction_on₂ (p := fun x y => star (x + y) = star x + star y)
-      · -- show IsClosed {x | star (x.1 + x.2) = star x.1 + star x.2}
-        exact isClosed_eq
-          (continuous_star.comp (continuous_add : Continuous (fun p : _ × _ => p.1 + p.2)))
-          (continuous_add.comp (Continuous.prodMap continuous_star continuous_star))
-        --apply continuous_add.comp (Continuous.prodMap continuous_star continuous_star)
-          --(continuous_add.comp (continuous_star.prod_mk continuous_star))
-      /-
-          apply Completion.map₂ (fun a b ↦ star (a + b) : α → α → α)
-      intro a₁ a₂ b₁ b₂
-      rw [star_add, star_add]
-      -/
-      · -- show that for each a b : α, we have star (↑a + ↑b) = star (↑a) + star (↑b)
-        intro a b
-        rw [← Completion.coe_add]
-        rw [star_def hstar, star_def hstar, star_def hstar, star_add]
-        rw [Completion.coe_add]
 
 
-    star_involutive := by
-      letI : InvolutiveStar (Completion α) := instInvolutiveStar hstar
-      exact star_involutive
-  }
+instance [UniformContinuousStar α] : StarAddMonoid (Completion α) where
+  star_add := by
+    intro r s
+    apply Completion.induction_on₂ (p := fun x y => star (x + y) = star x + star y)
+    · -- show IsClosed {x | star (x.1 + x.2) = star x.1 + star x.2}
+      exact isClosed_eq
+        (continuous_star.comp (continuous_add : Continuous (fun p : _ × _ => p.1 + p.2)))
+        (continuous_add.comp (Continuous.prodMap continuous_star continuous_star))
+    · -- show that for each a b : α, we have star (↑a + ↑b) = star (↑a) + star (↑b)
+      intro a b
+      rw [← Completion.coe_add]
+      rw [star_def, star_def, star_def, star_add]
+      rw [Completion.coe_add]
 
-end StarAddGroup
+end StarAddMonoid
 
 
 
