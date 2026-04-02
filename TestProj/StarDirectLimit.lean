@@ -259,7 +259,6 @@ lemma algebraMapAux_at (i : ι) (r : R) :
   rw [AlgHomClass.commutes, AlgHomClass.commutes]
 
 
-
 noncomputable instance : Algebra R (DirectLimit G f) where
   algebraMap := algebraMapAux
   commutes' := by
@@ -292,10 +291,6 @@ noncomputable def of2 (i : ι) : G i →ₐ[R] DirectLimit G f where
   map_add' _ _ := (add_def ..).symm
   map_zero' := (zero_def ..).symm
   commutes' := by intro r; rw [algebraMap_at i]
-    --have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
-    --rw [h]
-    --rw [algebraMapAux_at i]
-
 
 variable (G f) in
 noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f :=
@@ -304,9 +299,6 @@ noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f :=
     intro r
     rw [RingHom.toFun_eq_coe]
     rw [algebraMap_at i]
-    --have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
-    --rw [h]
-    --rw [algebraMapAux_at i]
     rw [show (DirectLimit.Ring.of G f i) (algebraMap R (G i) r)
           = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) by rfl]
 }
