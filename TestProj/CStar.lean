@@ -2,7 +2,22 @@ import TestProj.NormDirectLimit
 import TestProj.StarDirectLimit
 import Mathlib.Analysis.CStarAlgebra.Basic
 import Mathlib.Topology.Algebra.UniformRing
+import TestProj.CompletionStar
 
+section UniformContinuousStar
+
+variable {α : Type*}
+
+instance
+    [NormedAddCommGroup α] [StarAddMonoid α] [NormedStarGroup α] :
+    UniformContinuousStar α := by
+  refine ⟨?_⟩
+  refine Isometry.uniformContinuous ?_
+  intro x y
+  rw [edist_dist, edist_dist]
+  rw [dist_eq_norm, dist_eq_norm, ← star_sub, norm_star]
+
+end UniformContinuousStar
 
 #check DirectLimit.instNorm
 
