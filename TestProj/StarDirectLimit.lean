@@ -277,6 +277,11 @@ noncomputable instance : Algebra R (DirectLimit G f) where
         rw [algebraMapAux_at i, mul_def, Algebra.smul_def']
         rfl
 
+lemma algebraMap_at (i : ι) (r : R) :
+    algebraMap R (DirectLimit G f) r = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) := by
+  rw [← algebraMapAux_at i]
+  rfl
+
 namespace Algebra
 
 variable (G f) in
@@ -286,11 +291,10 @@ noncomputable def of2 (i : ι) : G i →ₐ[R] DirectLimit G f where
   map_mul' _ _ := (mul_def ..).symm
   map_add' _ _ := (add_def ..).symm
   map_zero' := (zero_def ..).symm
-  commutes' := by
-    intro r
-    have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
-    rw [h]
-    rw [algebraMapAux_at i]
+  commutes' := by intro r; rw [algebraMap_at i]
+    --have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
+    --rw [h]
+    --rw [algebraMapAux_at i]
 
 
 variable (G f) in
@@ -299,9 +303,10 @@ noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f :=
   commutes' := by
     intro r
     rw [RingHom.toFun_eq_coe]
-    have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
-    rw [h]
-    rw [algebraMapAux_at i]
+    rw [algebraMap_at i]
+    --have h : (algebraMap R (DirectLimit G f)) = algebraMapAux := rfl
+    --rw [h]
+    --rw [algebraMapAux_at i]
     rw [show (DirectLimit.Ring.of G f i) (algebraMap R (G i) r)
           = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) by rfl]
 }
@@ -368,6 +373,8 @@ noncomputable def lift2 (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f
 
 variable (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x)
 @[simp] theorem lift_of (i x) : lift G f A g Hg (of G f i x) = g i x := rfl
+
+@[simp] theorem lift2_of2 (i x) : lift2 G f A g Hg (of2 G f i x) = g i x := rfl
 
 
 end Algebra
