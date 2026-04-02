@@ -150,7 +150,6 @@ end StarModule
 
 
 -- TODO: add support for non-unital algebras
--- TODO: Consider adding DirectLimit.algebraMap_def, to simplify some of the proofs in this section.
 section Algebra
 
 variable [Nonempty ι]
