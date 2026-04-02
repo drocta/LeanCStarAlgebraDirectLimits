@@ -77,6 +77,81 @@ instance [UniformContinuousStar α] : StarAddMonoid (Completion α) where
 
 end StarAddMonoid
 
+section StarMul
 
+variable [Ring α] [StarMul α] [UniformContinuousStar α]
+variable [IsTopologicalRing α] [IsUniformAddGroup α]
+
+#synth Mul (Completion α)
+
+instance : StarMul (Completion α) where
+  star_mul := by
+    intro r s
+    apply Completion.induction_on₂ (p := fun x y => star (x * y) = star y * star x)
+    · -- show IsClosed {x | star (x.1 * x.2) = star x.2 * star x.1}
+      exact isClosed_eq
+        (continuous_star.comp (continuous_mul : Continuous (fun p : _ × _ => p.1 * p.2)))
+        (continuous_mul.comp
+          (continuous_swap.comp (Continuous.prodMap continuous_star continuous_star)))
+    · -- show that for each a b : α, we have star (↑a * ↑b) = star (↑b) * star (↑a)
+      intro a b
+      rw [← Completion.coe_mul]
+      rw [star_def, star_def, star_def, star_mul]
+      rw [Completion.coe_mul]
+
+#synth StarMul (Completion α)
+
+end StarMul
+
+section StarRing
+
+variable [Ring α] [StarRing α] [UniformContinuousStar α]
+variable [IsTopologicalRing α] [IsUniformAddGroup α]
+
+#synth StarAddMonoid α
+
+#synth UniformSpace α
+
+#synth Ring (Completion α)
+
+#synth AddGroup α
+#synth StarAddMonoid α
+
+#synth StarAddMonoid (Completion α)
+
+instance : StarRing (Completion α) where
+  star_add := (inferInstance : StarAddMonoid (Completion α)).star_add
+/-
+  by
+    intro r s
+    apply Completion.induction_on₂ (p := fun x y => star (x + y) = star x + star y)
+    · -- show IsClosed {x | star (x.1 + x.2) = star x.1 + star x.2}
+      exact isClosed_eq
+        (continuous_star.comp (continuous_add : Continuous (fun p : _ × _ => p.1 + p.2)))
+        (continuous_add.comp (Continuous.prodMap continuous_star continuous_star))
+    · -- show that for each a b : α, we have star (↑a + ↑b) = star (↑a) + star (↑b)
+      intro a b
+      rw [← Completion.coe_add]
+      rw [star_def, star_def, star_def, star_add]
+      rw [Completion.coe_add]
+
+  star_mul := by
+    intro r s
+    apply Completion.induction_on₂ (p := fun x y => star (x * y) = star y * star x)
+    · -- show IsClosed {x | star (x.1 * x.2) = star x.2 * star x.1}
+      exact isClosed_eq
+        (continuous_star.comp (continuous_mul : Continuous (fun p : _ × _ => p.1 * p.2)))
+        (continuous_mul.comp
+          (continuous_swap.comp (Continuous.prodMap continuous_star continuous_star)))
+    · -- show that for each a b : α, we have star (↑a * ↑b) = star (↑b) * star (↑a)
+      intro a b
+      rw [← Completion.coe_mul]
+      rw [star_def, star_def, star_def, star_mul]
+      rw [Completion.coe_mul]
+-/
+
+#synth StarRing (Completion α)
+
+end StarRing
 
 end
