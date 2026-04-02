@@ -1,6 +1,7 @@
 import TestProj.NormDirectLimit
 import TestProj.StarDirectLimit
 import Mathlib.Analysis.CStarAlgebra.Basic
+import Mathlib.Topology.Algebra.UniformRing
 
 
 #check DirectLimit.instNorm
@@ -12,9 +13,6 @@ variable [IsDirectedOrder ι]
 
 namespace DirectLimit
 
-section SeminormedAddCommGroup
-
-end SeminormedAddCommGroup
 
 #check SeminormedAddCommGroup
 
@@ -22,7 +20,8 @@ section NonUnitalNormedRing
 
 variable [∀ i, NonUnitalNormedRing (G i)]
 variable [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
-variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+--variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+variable [NormCompat G f]
 
 variable [Nonempty ι]
 
@@ -33,8 +32,8 @@ set_option diagnostics true in
 #synth NonUnitalRing (DirectLimit G f)
 
 noncomputable instance instNonUnitalNormedRing : NonUnitalNormedRing (DirectLimit G f) := by
-  letI := DirectLimit.instNorm hnorm
-  letI := DirectLimit.instNormedAddCommGroupOfNormedAddCommGroup hnorm
+  --letI := DirectLimit.instNorm hnorm
+  --letI := DirectLimit.instNormedAddCommGroup hnorm
   exact {
     dist_eq := by intro x y; rfl
     norm_mul_le := by
@@ -45,16 +44,41 @@ noncomputable instance instNonUnitalNormedRing : NonUnitalNormedRing (DirectLimi
   }
 
 #check instNonUnitalNormedRing
+#synth NonUnitalNormedRing (DirectLimit G f)
 
 end NonUnitalNormedRing
 
+section UnitalNormedRing
+
+variable [∀ i, NormedRing (G i)]
+variable [∀ i j h, RingHomClass (T h) (G i) (G j)]
+--variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+variable [NormCompat G f]
+
+variable [Nonempty ι]
+
+noncomputable instance instNormedRing : NormedRing (DirectLimit G f) := by
+  exact {
+    dist_eq := by intro x y; rfl
+    norm_mul_le := by
+      apply DirectLimit.induction₂ (C := fun x y => ‖x * y‖ ≤ ‖x‖ * ‖y‖)
+      intro i x y
+      rw [mul_def, norm_def, norm_def, norm_def]
+      exact norm_mul_le x y
+  }
+
+#check instNormedRing
+#synth NormedRing (DirectLimit G f)
+
+end UnitalNormedRing
 
 section CStarRing
 
 variable [∀ i, NonUnitalNormedRing (G i)] [∀ i, StarRing (G i)] [∀ i, CStarRing (G i)]
 variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
 variable [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
-variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+--variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+variable [NormCompat G f]
 
 variable [Nonempty ι]
 
@@ -63,13 +87,13 @@ variable [Nonempty ι]
 #synth Star (DirectLimit G f)
 #synth NonUnitalNonAssocSemiring (DirectLimit G f)
 #synth StarRing (DirectLimit G f)
---#synth NonUnitalNormedRing (DirectLimit G f)
+#synth NonUnitalNormedRing (DirectLimit G f)
 
 
-instance instCStarRing (hnorm) :
-    letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing hnorm
+instance instCStarRing :
+    --letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing hnorm
     CStarRing (DirectLimit G f) := by
-  letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing hnorm
+  --letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing hnorm
   exact {
     norm_mul_self_le := by
       apply DirectLimit.induction (C := fun x => ‖x‖ * ‖x‖ ≤ ‖star x * x‖)
@@ -78,8 +102,175 @@ instance instCStarRing (hnorm) :
       apply CStarRing.norm_mul_self_le
   }
 
-#check instCStarRing hnorm
+#check instCStarRing
+#synth CStarRing (DirectLimit G f)
 
 end CStarRing
+
+section Test
+
+--variable [NormedRing (DirectLimit G f)]
+variable [∀ i, NormedRing (G i)] [∀ i, StarRing (G i)] [∀ i, CStarRing (G i)]
+variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [∀ i j h, RingHomClass (T h) (G i) (G j)]
+variable [NormCompat G f]
+variable [Nonempty ι]
+/-
+#synth UniformSpace (DirectLimit G f)
+#synth TopologicalSpace (DirectLimit G f)
+#synth IsTopologicalRing (DirectLimit G f)
+#synth NonUnitalSeminormedRing (DirectLimit G f)
+
+#check NonUnitalNormedRing.toNonUnitalSeminormedRing
+#check UniformSpace.toTopologicalSpace
+-/
+
+
+set_option diagnostics true in
+set_option trace.Meta.synthInstance true in
+example : @IsTopologicalRing (DirectLimit G f)
+    PseudoMetricSpace.toUniformSpace.toTopologicalSpace _ := by
+  infer_instance
+  --letI i1 := @NonUnitalSeminormedRing.toIsTopologicalRing (α := DirectLimit G f) _
+  --exact i1
+  --letI : UniformSpace (DirectLimit G f) := by infer_instance
+  --letI : TopologicalSpace (DirectLimit G f) := UniformSpace.toTopologicalSpace
+  --apply NonUnitalSeminormedRing.toIsTopologicalRing (α := DirectLimit G f)
+  --apply NonUnitalNormedRing.toNonUnitalSeminormedRing
+  --infer_instance
+
+end Test
+
+noncomputable section StarCompletion
+
+open UniformSpace
+
+variable {α : Type*} [UniformSpace α]
+
+instance [Star α] : Star (UniformSpace.Completion α) :=
+  ⟨Completion.map (fun a ↦ star a : α → α)⟩
+
+instance [Mul α] [StarMul α] [Mul (UniformSpace.Completion α)] : StarMul (UniformSpace.Completion α) where
+  star_mul := by
+    apply Completion.map₂ (fun a b ↦ star (a * b) : α → α → α)
+    intro a₁ a₂ b₁ b₂
+    rw [star_mul, star_mul]
+
+end StarCompletion
+
+
+section CompletionCStarRing
+/- Because  Mathlib.Topology.Algebra.UniformRing currently only supports completion for
+*unital* rings, we are for the moment considering only unital `CStarRing`s-/
+
+variable [∀ i, NormedRing (G i)] [∀ i, StarRing (G i)] [∀ i, CStarRing (G i)]
+variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [∀ i j h, RingHomClass (T h) (G i) (G j)]
+--variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
+variable [NormCompat G f]
+
+variable [Nonempty ι]
+
+noncomputable local instance (priority := high) : TopologicalSpace (DirectLimit G f) :=
+  PseudoMetricSpace.toUniformSpace.toTopologicalSpace
+
+
+#synth ∀ i, IsTopologicalRing (G i)
+#synth IsTopologicalRing (DirectLimit G f)
+#synth NormedRing (DirectLimit G f)
+#synth UniformSpace (DirectLimit G f)
+#synth @IsTopologicalRing (DirectLimit G f)
+  PseudoMetricSpace.toUniformSpace.toTopologicalSpace _
+
+
+example : @IsTopologicalRing (DirectLimit G f)
+    PseudoMetricSpace.toUniformSpace.toTopologicalSpace _  := by
+  infer_instance
+
+section alpha
+
+variable (α : Type*) [NormedRing α] --[UniformSpace α]
+#synth IsTopologicalRing α
+#synth Ring (UniformSpace.Completion α )
+
+end alpha
+
+#check instCStarRing (G := G) (f := f)
+
+#check (letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing
+       @PseudoMetricSpace.toUniformSpace (DirectLimit G f) inferInstance)
+
+--letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing hnorm
+--#check @PseudoMetricSpace.toUniformSpace (DirectLimit G f) ((instNonUnitalNormedRing hnorm))
+
+instance foo {X : Type*} (h : NonUnitalNormedRing X) : UniformSpace X :=
+  h.toNonUnitalSeminormedRing.toPseudoMetricSpace.toUniformSpace
+
+instance foo2 {X : Type*} (h : NormedRing X) : UniformSpace X :=
+  h.toSeminormedRing.toPseudoMetricSpace.toUniformSpace
+
+#check foo (instNonUnitalNormedRing )
+
+#check @UniformSpace.Completion _ (foo (instNonUnitalNormedRing ))
+
+#synth Ring (@UniformSpace.Completion _ (foo (instNonUnitalNormedRing (G := G) (f := f)) ))
+
+
+
+
+def bar :=
+  --letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing
+  UniformSpace.Completion (DirectLimit G f)
+
+variable (G f) in
+abbrev bar2 :=
+  --letI : NormedRing (DirectLimit G f) := instNormedRing
+  UniformSpace.Completion (DirectLimit G f)
+
+#check bar
+
+example : (@UniformSpace.Completion _ (foo2 (instNormedRing (G := G) (f := f) ))) =
+    (bar2 (G := G) (f := f) ) := rfl
+#synth Ring (@UniformSpace.Completion _ (foo2 (instNormedRing (G := G) (f := f))))
+
+--set_option diagnostics true in
+#synth Mul (bar2 (G := G) (f := f))
+
+--variable [NonUnitalNormedRing (DirectLimit G f)]
+#synth PseudoMetricSpace (DirectLimit G f)
+
+
+#check (UniformSpace.Completion (DirectLimit G f))
+
+
+open UniformSpace
+
+#synth ∀ i, ContinuousStar (G i)
+#synth NormedStarGroup (DirectLimit G f)
+#synth ContinuousStar (DirectLimit G f)
+#synth UniformSpace (DirectLimit G f)
+#synth NormedRing (DirectLimit G f)
+#synth Star (Completion (DirectLimit G f))
+#synth StarMul (Completion (DirectLimit G f))
+
+#synth @ContinuousStar (DirectLimit G f) PseudoMetricSpace.toUniformSpace.toTopologicalSpace _
+
+/-
+instance instContinuousStar : @ContinuousStar (DirectLimit G f)
+    PseudoMetricSpace.toUniformSpace.toTopologicalSpace _ := by
+  exact NormedStarGroup.to_continuousStar (E := DirectLimit G f)
+#check instContinuousStar
+#synth ContinuousStar (DirectLimit G f)
+#synth @ContinuousStar (DirectLimit G f) PseudoMetricSpace.toUniformSpace.toTopologicalSpace _
+-/
+
+--instance : Star (Completion (DirectLimit G f)) where
+--  star :=
+
+
+
+
+
+end CompletionCStarRing
 
 end DirectLimit
