@@ -126,4 +126,6 @@ instance : StarRing (Completion α) where
 
 end StarRing
 
+--TODO : Maybe later add an instance for `StarModule R (Completion α)` given `StarModule R α` etc.
+
 end
