@@ -281,6 +281,73 @@ open UniformSpace
 
 #synth @ContinuousStar (DirectLimit G f) PseudoMetricSpace.toUniformSpace.toTopologicalSpace _
 
+#synth ContinuousStar (Completion (DirectLimit G f))
+#synth NormedRing (Completion (DirectLimit G f))
+
+--#synth CStarRing (Completion (DirectLimit G f))
+
+--todo : should not have this section be named "boogie", either rename it or make it not a section
+section boogie
+
+variable {α : Type*} [NormedRing α] [StarRing α] [CStarRing α]
+
+instance : CStarRing (Completion α) where
+  norm_mul_self_le := by
+    intro x
+    apply Completion.induction_on (p := fun x => ‖x‖ * ‖x‖ ≤ ‖star x * x‖)
+    · -- show the set {x | ‖x‖ * ‖x‖ ≤ ‖star x * x‖} is closed
+      refine isClosed_le ?_ ?_
+      · -- show Continuous (fun x : Completion α => ‖x‖ * ‖x‖)
+        fun_prop
+      · -- show Continuous (fun a : Completion α => ‖star a * a‖)
+        fun_prop
+    · -- show that for each a : α, we have ‖↑a‖ * ‖↑a‖ ≤ ‖star (↑a) * ↑a‖
+      intro a
+      --todo: the `_root_.star_def` is to get the one from the completion, rather than the direct limit
+      -- but it shouldn't be in the root namespace, so CompletionStar.lean should put it in a namespace.
+      rw [_root_.star_def, ← Completion.coe_mul, Completion.norm_coe, Completion.norm_coe]
+      apply CStarRing.norm_mul_self_le
+    --intro x
+    --rw [star_def, mul_def, norm_def, norm_def]
+    --apply CStarRing.norm_mul_self_le
+
+#synth CStarRing (Completion α)
+end boogie
+
+#synth CStarRing (Completion (DirectLimit G f))
+
+/-
+instance : CStarRing (Completion (DirectLimit G f)) where
+  norm_mul_self_le := by
+    intro x
+    apply Completion.induction_on (p := fun x => ‖x‖ * ‖x‖ ≤ ‖star x * x‖)
+    · -- show the set {x | ‖x‖ * ‖x‖ ≤ ‖star x * x‖} is closed
+      refine isClosed_le ?_ ?_
+      · -- show Continuous (fun x : Completion (DirectLimit G f) => ‖x‖ * ‖x‖)
+        fun_prop
+        --exact (continuous_norm.comp continuous_id).mul (continuous_norm.comp continuous_id)
+      · -- show Continuous (fun a : Completion (DirectLimit G f) => ‖star a * a‖)
+        fun_prop
+        --exact (continuous_mul.comp (Continuous.prodMap continuous_star continuous_id)).comp continuous_id
+    · -- show that for each a : DirectLimit G f, we have ‖↑a‖ * ‖↑a‖ ≤ ‖star (↑a) * ↑a‖
+      intro a
+      rw [star_def, mul_def, norm_def, norm_def]
+      apply CStarRing.norm_mul_self_le
+    intro x
+    rw [star_def, mul_def, norm_def, norm_def]
+    apply CStarRing.norm_mul_self_le
+-/
+
+
+  /-
+    norm_mul_self_le := by
+    apply Completion.induction (C := fun x => ‖x‖ * ‖x‖ ≤ ‖star x * x‖)
+    intro x
+    rw [star_def, mul_def, norm_def, norm_def]
+    apply CStarRing.norm_mul_self_le
+  -/
+
+
 /-
 instance instContinuousStar : @ContinuousStar (DirectLimit G f)
     PseudoMetricSpace.toUniformSpace.toTopologicalSpace _ := by
