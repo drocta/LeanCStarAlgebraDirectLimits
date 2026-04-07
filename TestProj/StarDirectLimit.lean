@@ -1,5 +1,4 @@
 import Mathlib.Algebra.Colimit.DirectLimit
-import Mathlib.Algebra.Star.Basic
 import Mathlib.Algebra.Star.StarRingHom
 import Mathlib.Algebra.Algebra.Defs
 import Mathlib.Algebra.Algebra.Hom
