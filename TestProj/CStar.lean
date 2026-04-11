@@ -90,15 +90,7 @@ variable [∀ i, NonUnitalNormedRing (G i)] [∀ i, StarRing (G i)] [∀ i, CSta
 variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
 variable [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
 variable [NormCompat G f]
-
 variable [Nonempty ι]
-
-
-
-#synth Star (DirectLimit G f)
-#synth NonUnitalNonAssocSemiring (DirectLimit G f)
-#synth StarRing (DirectLimit G f)
-#synth NonUnitalNormedRing (DirectLimit G f)
 
 
 instance instCStarRing :
@@ -109,14 +101,7 @@ instance instCStarRing :
     rw [star_def, mul_def, norm_def, norm_def]
     apply CStarRing.norm_mul_self_le
 
-
-#check instCStarRing
-#synth CStarRing (DirectLimit G f)
-
 end CStarRing
-
-
-
 
 section CompletionCStarRing
 /- Because  Mathlib.Topology.Algebra.UniformRing currently only supports completion for
@@ -133,12 +118,7 @@ noncomputable local instance (priority := high) : TopologicalSpace (DirectLimit 
   PseudoMetricSpace.toUniformSpace.toTopologicalSpace
 
 
-#synth ∀ i, IsTopologicalRing (G i)
-#synth IsTopologicalRing (DirectLimit G f)
-#synth NormedRing (DirectLimit G f)
-#synth UniformSpace (DirectLimit G f)
-#synth @IsTopologicalRing (DirectLimit G f)
-  PseudoMetricSpace.toUniformSpace.toTopologicalSpace _
+
 
 
 example : @IsTopologicalRing (DirectLimit G f)
@@ -149,24 +129,6 @@ example : @IsTopologicalRing (DirectLimit G f)
 
 
 open UniformSpace
-
-#synth ∀ i, ContinuousStar (G i)
-#synth NormedStarGroup (DirectLimit G f)
-#synth ContinuousStar (DirectLimit G f)
-#synth UniformSpace (DirectLimit G f)
-#synth NormedRing (DirectLimit G f)
-#synth Star (Completion (DirectLimit G f))
-#synth StarMul (Completion (DirectLimit G f))
-
-#synth StarRing (Completion (DirectLimit G f))
-#synth NormedRing (Completion (DirectLimit G f))
-#synth NormedRing (DirectLimit G f)
-
-#synth @ContinuousStar (DirectLimit G f) PseudoMetricSpace.toUniformSpace.toTopologicalSpace _
-
-#synth ContinuousStar (Completion (DirectLimit G f))
-#synth NormedRing (Completion (DirectLimit G f))
-
 
 --todo : should not have this section be named "boogie", either rename it or make it not a section
 section boogie
@@ -192,11 +154,6 @@ instance : CStarRing (Completion α) where
 
 #synth CStarRing (Completion α)
 end boogie
-
-#synth CStarRing (Completion (DirectLimit G f))
-
-#synth UniformContinuousStar (Completion (DirectLimit G f))
-
 
 end CompletionCStarRing
 
