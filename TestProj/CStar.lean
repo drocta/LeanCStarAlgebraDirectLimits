@@ -37,7 +37,6 @@ section NonUnitalNormedRing
 
 variable [∀ i, NonUnitalNormedRing (G i)]
 variable [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
---variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
 variable [NormCompat G f]
 
 variable [Nonempty ι]
@@ -48,17 +47,14 @@ variable [Nonempty ι]
 set_option diagnostics true in
 #synth NonUnitalRing (DirectLimit G f)
 
-noncomputable instance instNonUnitalNormedRing : NonUnitalNormedRing (DirectLimit G f) := by
-  --letI := DirectLimit.instNorm hnorm
-  --letI := DirectLimit.instNormedAddCommGroup hnorm
-  exact {
-    dist_eq := by intro x y; rfl
-    norm_mul_le := by
-      apply DirectLimit.induction₂ (C := fun x y => ‖x * y‖ ≤ ‖x‖ * ‖y‖)
-      intro i x y
-      rw [mul_def, norm_def, norm_def, norm_def]
-      exact norm_mul_le x y
-  }
+noncomputable instance instNonUnitalNormedRing : NonUnitalNormedRing (DirectLimit G f) where
+  dist_eq := by intro x y; rfl
+  norm_mul_le := by
+    apply DirectLimit.induction₂ (C := fun x y => ‖x * y‖ ≤ ‖x‖ * ‖y‖)
+    intro i x y
+    rw [mul_def, norm_def, norm_def, norm_def]
+    exact norm_mul_le x y
+
 
 #check instNonUnitalNormedRing
 #synth NonUnitalNormedRing (DirectLimit G f)
@@ -69,20 +65,18 @@ section UnitalNormedRing
 
 variable [∀ i, NormedRing (G i)]
 variable [∀ i j h, RingHomClass (T h) (G i) (G j)]
---variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
 variable [NormCompat G f]
 
 variable [Nonempty ι]
 
-noncomputable instance instNormedRing : NormedRing (DirectLimit G f) := by
-  exact {
-    dist_eq := by intro x y; rfl
-    norm_mul_le := by
-      apply DirectLimit.induction₂ (C := fun x y => ‖x * y‖ ≤ ‖x‖ * ‖y‖)
-      intro i x y
-      rw [mul_def, norm_def, norm_def, norm_def]
-      exact norm_mul_le x y
-  }
+noncomputable instance instNormedRing : NormedRing (DirectLimit G f) where
+  dist_eq := by intro x y; rfl
+  norm_mul_le := by
+    apply DirectLimit.induction₂ (C := fun x y => ‖x * y‖ ≤ ‖x‖ * ‖y‖)
+    intro i x y
+    rw [mul_def, norm_def, norm_def, norm_def]
+    exact norm_mul_le x y
+
 
 #check instNormedRing
 #synth NormedRing (DirectLimit G f)
@@ -94,7 +88,6 @@ section CStarRing
 variable [∀ i, NonUnitalNormedRing (G i)] [∀ i, StarRing (G i)] [∀ i, CStarRing (G i)]
 variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
 variable [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
---variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
 variable [NormCompat G f]
 
 variable [Nonempty ι]
@@ -108,16 +101,13 @@ variable [Nonempty ι]
 
 
 instance instCStarRing :
-    --letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing hnorm
-    CStarRing (DirectLimit G f) := by
-  --letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing hnorm
-  exact {
-    norm_mul_self_le := by
-      apply DirectLimit.induction (C := fun x => ‖x‖ * ‖x‖ ≤ ‖star x * x‖)
-      intro i x
-      rw [star_def, mul_def, norm_def, norm_def]
-      apply CStarRing.norm_mul_self_le
-  }
+    CStarRing (DirectLimit G f) where
+  norm_mul_self_le := by
+    apply DirectLimit.induction (C := fun x => ‖x‖ * ‖x‖ ≤ ‖star x * x‖)
+    intro i x
+    rw [star_def, mul_def, norm_def, norm_def]
+    apply CStarRing.norm_mul_self_le
+
 
 #check instCStarRing
 #synth CStarRing (DirectLimit G f)
@@ -186,7 +176,6 @@ section CompletionCStarRing
 variable [∀ i, NormedRing (G i)] [∀ i, StarRing (G i)] [∀ i, CStarRing (G i)]
 variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
 variable [∀ i j h, RingHomClass (T h) (G i) (G j)]
---variable (hnorm : ∀ i j h x, ‖(x : G i)‖ = ‖((f i j h) x : G j)‖)
 variable [NormCompat G f]
 
 variable [Nonempty ι]
