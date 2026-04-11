@@ -115,39 +115,6 @@ instance instCStarRing :
 
 end CStarRing
 
-section Test
-
---variable [NormedRing (DirectLimit G f)]
-variable [∀ i, NormedRing (G i)] [∀ i, StarRing (G i)] [∀ i, CStarRing (G i)]
-variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
-variable [∀ i j h, RingHomClass (T h) (G i) (G j)]
-variable [NormCompat G f]
-variable [Nonempty ι]
-/-
-#synth UniformSpace (DirectLimit G f)
-#synth TopologicalSpace (DirectLimit G f)
-#synth IsTopologicalRing (DirectLimit G f)
-#synth NonUnitalSeminormedRing (DirectLimit G f)
-
-#check NonUnitalNormedRing.toNonUnitalSeminormedRing
-#check UniformSpace.toTopologicalSpace
--/
-
-
-set_option diagnostics true in
-set_option trace.Meta.synthInstance true in
-example : @IsTopologicalRing (DirectLimit G f)
-    PseudoMetricSpace.toUniformSpace.toTopologicalSpace _ := by
-  infer_instance
-  --letI i1 := @NonUnitalSeminormedRing.toIsTopologicalRing (α := DirectLimit G f) _
-  --exact i1
-  --letI : UniformSpace (DirectLimit G f) := by infer_instance
-  --letI : TopologicalSpace (DirectLimit G f) := UniformSpace.toTopologicalSpace
-  --apply NonUnitalSeminormedRing.toIsTopologicalRing (α := DirectLimit G f)
-  --apply NonUnitalNormedRing.toNonUnitalSeminormedRing
-  --infer_instance
-
-end Test
 
 
 
@@ -178,60 +145,7 @@ example : @IsTopologicalRing (DirectLimit G f)
     PseudoMetricSpace.toUniformSpace.toTopologicalSpace _  := by
   infer_instance
 
-section alpha
 
-variable (α : Type*) [NormedRing α] --[UniformSpace α]
-#synth IsTopologicalRing α
-#synth Ring (UniformSpace.Completion α )
-#synth NonUnitalNormedRing (UniformSpace.Completion α)
-#synth UniformSpace α
-
-end alpha
-
-#check instCStarRing (G := G) (f := f)
-
-#check (letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing
-       @PseudoMetricSpace.toUniformSpace (DirectLimit G f) inferInstance)
-
-
-instance foo {X : Type*} (h : NonUnitalNormedRing X) : UniformSpace X :=
-  h.toNonUnitalSeminormedRing.toPseudoMetricSpace.toUniformSpace
-
-instance foo2 {X : Type*} (h : NormedRing X) : UniformSpace X :=
-  h.toSeminormedRing.toPseudoMetricSpace.toUniformSpace
-
-#check foo (instNonUnitalNormedRing )
-
-#check @UniformSpace.Completion _ (foo (instNonUnitalNormedRing ))
-
-#synth Ring (@UniformSpace.Completion _ (foo (instNonUnitalNormedRing (G := G) (f := f)) ))
-
-
-
-
-def bar :=
-  --letI : NonUnitalNormedRing (DirectLimit G f) := instNonUnitalNormedRing
-  UniformSpace.Completion (DirectLimit G f)
-
-variable (G f) in
-abbrev bar2 :=
-  --letI : NormedRing (DirectLimit G f) := instNormedRing
-  UniformSpace.Completion (DirectLimit G f)
-
-#check bar
-
-example : (@UniformSpace.Completion _ (foo2 (instNormedRing (G := G) (f := f) ))) =
-    (bar2 (G := G) (f := f) ) := rfl
-#synth Ring (@UniformSpace.Completion _ (foo2 (instNormedRing (G := G) (f := f))))
-
---set_option diagnostics true in
-#synth Mul (bar2 (G := G) (f := f))
-
---variable [NonUnitalNormedRing (DirectLimit G f)]
-#synth PseudoMetricSpace (DirectLimit G f)
-
-
-#check (UniformSpace.Completion (DirectLimit G f))
 
 
 open UniformSpace
@@ -253,7 +167,6 @@ open UniformSpace
 #synth ContinuousStar (Completion (DirectLimit G f))
 #synth NormedRing (Completion (DirectLimit G f))
 
---#synth CStarRing (Completion (DirectLimit G f))
 
 --todo : should not have this section be named "boogie", either rename it or make it not a section
 section boogie
