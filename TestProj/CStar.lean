@@ -425,8 +425,6 @@ noncomputable instance : CStarAlgebra (Completion (DirectLimit G f)) where
       --todo: the `_root_.star_def` is to get the one from the completion, rather than the direct limit
       -- but it shouldn't be in the root namespace, so CompletionStar.lean should put it in a namespace.
       rw [Completion.smul_def, _root_.star_def, Completion.smul_def]
-      have h : UniformContinuous fun (x : DirectLimit G f) ↦ r • x := by
-        apply uniformContinuous_const_smul r
       rw [Completion.map_coe (uniformContinuous_const_smul r), Completion.map_coe (uniformContinuous_const_smul (star r))]
       -- TODO : again, the `_root_.star_def` is to get the one from the completion, but it shouldn't be in the root namespace
       rw [_root_.star_def, @star_smul]
