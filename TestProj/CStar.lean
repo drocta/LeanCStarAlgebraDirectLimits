@@ -1,6 +1,7 @@
 import TestProj.NormDirectLimit
 import TestProj.StarDirectLimit
 import Mathlib.Analysis.CStarAlgebra.Basic
+import Mathlib.Analysis.CStarAlgebra.Classes
 import Mathlib.Topology.Algebra.UniformRing
 import TestProj.CompletionStar
 import Mathlib.Analysis.Normed.Module.Completion
@@ -305,6 +306,9 @@ end boogie
 
 #synth CStarRing (Completion (DirectLimit G f))
 
+#synth UniformContinuousStar (Completion (DirectLimit G f))
+
+
 /-
 instance : CStarRing (Completion (DirectLimit G f)) where
   norm_mul_self_le := by
@@ -354,5 +358,128 @@ instance instContinuousStar : @ContinuousStar (DirectLimit G f)
 
 
 end CompletionCStarRing
+
+
+section CStarAlgebra
+
+variable [∀ i, CStarAlgebra (G i)]
+#synth ∀ i, NormedRing (G i)
+#synth ∀ i, StarRing (G i)
+#synth ∀ i, CStarRing (G i)
+variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
+variable [∀ i j h, AlgHomClass (T h) ℂ (G i) (G j)]
+-- variable [∀ i j h, RingHomClass (T h) (G i) (G j)] -- not needed, as AlgHomClass implies RingHomClass
+#synth ∀ i j h, RingHomClass (T h) (G i) (G j)
+variable [NormCompat G f]
+
+variable [Nonempty ι]
+
+open UniformSpace
+#synth CStarRing (Completion (DirectLimit G f))
+#synth ∀ i, Algebra ℂ (G i)
+variable [∀ i j h, AlgHomClass (T h) ℂ (G i) (G j)]
+#synth Algebra ℂ (DirectLimit G f)
+
+local instance {A : Type*} [UniformSpace A] [Ring A] [Algebra ℂ A]
+    [IsUniformAddGroup A] [IsTopologicalRing A] : UniformContinuousConstSMul ℂ A :=
+  uniformContinuousConstSMul_of_continuousConstSMul ℂ A
+
+#synth Algebra ℂ (Completion (DirectLimit G f))
+
+#synth CStarAlgebra (Completion (DirectLimit G f))
+
+
+instance : NormSMulClass ℂ (DirectLimit G f) where
+  norm_smul := by
+    intro r x
+    apply DirectLimit.induction (C := fun x => ‖r • x‖ = ‖r‖ * ‖x‖)
+    intro i x
+    rw [smul_def, norm_def, norm_def]
+    apply norm_smul
+
+#synth IsBoundedSMul ℂ (DirectLimit G f)
+
+/-
+This is redundant with the NormSMulClass instane above, and should be deleted in the commit after it is first committed.
+instance : IsBoundedSMul ℂ (DirectLimit G f) where
+  dist_smul_pair' := by
+    intro r x y
+    rw [dist_eq_norm, dist_eq_norm, dist_eq_norm, sub_zero]
+    rw [← @smul_sub]
+    refine DirectLimit.induction₂ (F := G) (f := f) (x := x) (y := y) (C := fun x y => ‖r • (x - y)‖ ≤ ‖r‖ * ‖x - y‖) ?_
+    intro i x y
+    rw [sub_def, smul_def, norm_def, norm_def]
+    exact norm_smul_le r (x - y)
+  dist_pair_smul' := by
+    intro r s x
+    rw [dist_eq_norm, ← @sub_smul, dist_eq_norm, dist_eq_norm, sub_zero]
+    refine DirectLimit.induction (F := G) (f := f) (x := x) (C := fun x => ‖(r - s) • x‖ ≤ ‖r - s‖ * ‖x‖) ?_
+    intro i x
+    rw [smul_def, norm_def, norm_def]
+    exact norm_smul_le (r - s) x
+-/
+
+
+#synth IsBoundedSMul ℂ (DirectLimit G f)
+
+
+/-
+  exists_bound := by
+    intro x
+    apply DirectLimit.induction (C := fun x => ∃ R, ∀ r, ‖r • x‖ ≤ R * ‖r‖) x
+    intro i y
+    use ‖y‖ + 1
+    intro r
+    rw [norm_def, norm_def]
+-/
+
+
+
+#synth CompleteSpace (Completion (DirectLimit G f)) -- well duh, it's a completion
+
+noncomputable instance : CStarAlgebra (Completion (DirectLimit G f)) where
+  norm_smul_le := by
+    intro r x
+    apply Completion.induction_on (p := fun x => ‖r • x‖ ≤ ‖r‖ * ‖x‖) x
+    · -- show the set {a | ‖r • a‖ ≤ ‖r‖ * ‖a‖} is closed
+      refine isClosed_le ?_ ?_
+      · -- show Continuous (fun x : Completion (DirectLimit G f) => ‖r • x‖)
+        refine continuous_norm.comp ?_
+        apply Completion.continuous_map
+      · -- show Continuous (fun x : Completion (DirectLimit G f) => ‖r‖ * ‖x‖)
+        apply (continuous_const.mul continuous_norm)
+    · -- show that for each a : DirectLimit G f, we have ‖r • ↑a‖ ≤ ‖r‖ * ‖↑a‖
+      intro a
+      rw [Completion.smul_def]
+      have h : UniformContinuous fun (x : DirectLimit G f) ↦ r • x := by
+        apply uniformContinuous_const_smul
+      rw [Completion.map_coe h, @Completion.norm_coe, @Completion.norm_coe]
+      apply norm_smul_le
+  star_smul := by
+    intro r x
+    apply Completion.induction_on (p := fun x => star (r • x) = star r • star x) x
+    · -- show the set {a | star (r • a) = star r • star a} is closed
+      refine isClosed_eq ?_ ?_
+      · -- show ⊢ Continuous fun a ↦ star (r • a)
+        refine continuous_star.comp ?_
+        apply Completion.continuous_map
+      · -- show ⊢ Continuous fun a ↦ star r • star a
+        refine (continuous_const.smul continuous_star).comp continuous_id
+    · -- show that for each a : DirectLimit G f, we have star (r • ↑a) = star r • star (↑a)
+      intro a
+      --todo: the `_root_.star_def` is to get the one from the completion, rather than the direct limit
+      -- but it shouldn't be in the root namespace, so CompletionStar.lean should put it in a namespace.
+      rw [Completion.smul_def, _root_.star_def, Completion.smul_def]
+      have h : UniformContinuous fun (x : DirectLimit G f) ↦ r • x := by
+        apply uniformContinuous_const_smul r
+      rw [Completion.map_coe (uniformContinuous_const_smul r), Completion.map_coe (uniformContinuous_const_smul (star r))]
+      -- TODO : again, the `_root_.star_def` is to get the one from the completion, but it shouldn't be in the root namespace
+      rw [_root_.star_def, @star_smul]
+
+#synth CStarAlgebra (Completion (DirectLimit G f))
+
+
+
+end CStarAlgebra
 
 end DirectLimit
