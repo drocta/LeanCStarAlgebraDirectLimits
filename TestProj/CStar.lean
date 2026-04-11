@@ -368,7 +368,6 @@ variable [∀ i, CStarAlgebra (G i)]
 #synth ∀ i, CStarRing (G i)
 variable [∀ i j h, StarHomClass (T h) (G i) (G j)]
 variable [∀ i j h, AlgHomClass (T h) ℂ (G i) (G j)]
--- variable [∀ i j h, RingHomClass (T h) (G i) (G j)] -- not needed, as AlgHomClass implies RingHomClass
 #synth ∀ i j h, RingHomClass (T h) (G i) (G j)
 variable [NormCompat G f]
 
@@ -384,10 +383,6 @@ local instance {A : Type*} [UniformSpace A] [Ring A] [Algebra ℂ A]
     [IsUniformAddGroup A] [IsTopologicalRing A] : UniformContinuousConstSMul ℂ A :=
   uniformContinuousConstSMul_of_continuousConstSMul ℂ A
 
-#synth Algebra ℂ (Completion (DirectLimit G f))
-
-#synth CStarAlgebra (Completion (DirectLimit G f))
-
 
 instance : NormSMulClass ℂ (DirectLimit G f) where
   norm_smul := by
@@ -396,46 +391,6 @@ instance : NormSMulClass ℂ (DirectLimit G f) where
     intro i x
     rw [smul_def, norm_def, norm_def]
     apply norm_smul
-
-#synth IsBoundedSMul ℂ (DirectLimit G f)
-
-/-
-This is redundant with the NormSMulClass instane above, and should be deleted in the commit after it is first committed.
-instance : IsBoundedSMul ℂ (DirectLimit G f) where
-  dist_smul_pair' := by
-    intro r x y
-    rw [dist_eq_norm, dist_eq_norm, dist_eq_norm, sub_zero]
-    rw [← @smul_sub]
-    refine DirectLimit.induction₂ (F := G) (f := f) (x := x) (y := y) (C := fun x y => ‖r • (x - y)‖ ≤ ‖r‖ * ‖x - y‖) ?_
-    intro i x y
-    rw [sub_def, smul_def, norm_def, norm_def]
-    exact norm_smul_le r (x - y)
-  dist_pair_smul' := by
-    intro r s x
-    rw [dist_eq_norm, ← @sub_smul, dist_eq_norm, dist_eq_norm, sub_zero]
-    refine DirectLimit.induction (F := G) (f := f) (x := x) (C := fun x => ‖(r - s) • x‖ ≤ ‖r - s‖ * ‖x‖) ?_
-    intro i x
-    rw [smul_def, norm_def, norm_def]
-    exact norm_smul_le (r - s) x
--/
-
-
-#synth IsBoundedSMul ℂ (DirectLimit G f)
-
-
-/-
-  exists_bound := by
-    intro x
-    apply DirectLimit.induction (C := fun x => ∃ R, ∀ r, ‖r • x‖ ≤ R * ‖r‖) x
-    intro i y
-    use ‖y‖ + 1
-    intro r
-    rw [norm_def, norm_def]
--/
-
-
-
-#synth CompleteSpace (Completion (DirectLimit G f)) -- well duh, it's a completion
 
 noncomputable instance : CStarAlgebra (Completion (DirectLimit G f)) where
   norm_smul_le := by
