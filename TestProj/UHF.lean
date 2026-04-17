@@ -62,7 +62,7 @@ def N : ℕ → Type u
   | n + 1 => (N n) × F (n + 1)
 
 
-abbrev G n := Matrix (N F n) (N F n) ℂ
+abbrev G (n : ℕ) := Matrix (N F n) (N F n) ℂ
 
 
 instance : ∀ n, Fintype (N F n) := by
@@ -99,8 +99,9 @@ instance : ∀ n, Nonempty (N F n) := by
 #synth ∀ n, CStarAlgebra (G F n)
 
 
-noncomputable def step (n : ℕ) : (G F n) →⋆ₐ[ℂ] (G F (n+1)) :=
-  amplify (N F n) (F (n+1))
+
+noncomputable def step (n : ℕ) : (G F n) →⋆ₐ[ℂ] (G F (n + 1)) :=
+  amplify (N F n) (F (n + 1))
 
 noncomputable def hom {n m : ℕ} (h : n ≤ m) : G F n →⋆ₐ[ℂ] G F m :=
   Nat.leRecOn (C := fun t => G F n →⋆ₐ[ℂ] G F t) h
@@ -165,9 +166,9 @@ lemma norm_hom (i j : ℕ) (hij : i ≤ j) (x : G F i) :
       exact norm_amplify (N F j') (F (j' + 1)) ((hom F hij') x)
 
 
-abbrev UHF_T {i j : ℕ} (hij : i ≤ j) := G F i →⋆ₐ[ℂ] G F j
-noncomputable abbrev UHF_f (i j : ℕ) (hij : i ≤ j) : UHF_T F hij:= hom (F := F) hij
-#check UHF_f
+abbrev UHF_T {i j : ℕ} (_ : i ≤ j) := G F i →⋆ₐ[ℂ] G F j
+noncomputable abbrev UHF_f (i j : ℕ) (hij : i ≤ j) : UHF_T F hij :=
+  hom (F := F) hij
 
 #check DirectLimit (G F) (UHF_f F)
 
