@@ -70,7 +70,7 @@ instance : ∀ n, Fintype (N F n) := by
   induction n with
   | zero => change Fintype (F 0); infer_instance
   | succ n ih =>
-    unfold N -- change Fintype ((N F n) × F (n + 1))
+    change Fintype ((N F n) × F (n + 1)) -- obtained by `unfold N`
     infer_instance
 
 instance : ∀ n, DecidableEq (N F n) := by
@@ -78,7 +78,7 @@ instance : ∀ n, DecidableEq (N F n) := by
   induction n with
   | zero => change DecidableEq (F 0); infer_instance
   | succ n ih =>
-    unfold N -- change DecidableEq ((N F n) × F (n + 1))
+    change DecidableEq ((N F n) × F (n + 1)) -- `unfold N` also works here
     infer_instance
 
 instance : ∀ n, Nonempty (N F n) := by
@@ -86,7 +86,7 @@ instance : ∀ n, Nonempty (N F n) := by
   induction n with
   | zero => change Nonempty (F 0); infer_instance
   | succ n ih =>
-    unfold N -- change Nonempty ((N F n) × F (n + 1))
+    change Nonempty ((N F n) × F (n + 1)) -- `unfold N` also works here
     infer_instance
 
 #synth ∀ n, Semiring (G F n)
