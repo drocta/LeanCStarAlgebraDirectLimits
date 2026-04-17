@@ -9,8 +9,8 @@ open scoped Matrix.Norms.L2Operator
 
 section
 
-variable {n k : Type*}
-variable [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
+variable {n : Type*}
+variable [Fintype n] [DecidableEq n]
 
 set_option backward.isDefEq.respectTransparency false in
 noncomputable instance : CStarAlgebra (Matrix n n ℂ) where
