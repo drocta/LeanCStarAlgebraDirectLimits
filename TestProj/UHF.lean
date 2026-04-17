@@ -165,34 +165,34 @@ lemma norm_hom (i j : ℕ) (hij : i ≤ j) (x : G F i) :
       exact norm_amplify (N F j') (F (j' + 1)) ((hom F hij') x)
 
 
-abbrev UHF_T {i j : ℕ} (_ : i ≤ j) := G F i →⋆ₐ[ℂ] G F j
-noncomputable abbrev UHF_f (i j : ℕ) (hij : i ≤ j) : UHF_T F hij :=
+abbrev T {i j : ℕ} (_ : i ≤ j) := G F i →⋆ₐ[ℂ] G F j
+noncomputable abbrev f (i j : ℕ) (hij : i ≤ j) : T F hij :=
   hom (F := F) hij
 
-#check DirectLimit (G F) (UHF_f F)
+#check DirectLimit (G F) (f F)
 
-#synth ∀ i j (hij : i ≤ j), FunLike (UHF_T F hij) (G F i) (G F j)
-#synth ∀ i j h, StarHomClass (UHF_T F h) (G F i) (G F j)
-#synth ∀ i j h, AlgHomClass (UHF_T F h) ℂ (G F i) (G F j)
+#synth ∀ i j (hij : i ≤ j), FunLike (T F hij) (G F i) (G F j)
+#synth ∀ i j h, StarHomClass (T F h) (G F i) (G F j)
+#synth ∀ i j h, AlgHomClass (T F h) ℂ (G F i) (G F j)
 
 
-#check DirectLimit.NormCompat (G F) (UHF_f F)
+#check DirectLimit.NormCompat (G F) (f F)
 
 variable {F} in
-instance normCompat : DirectLimit.NormCompat (G F) (UHF_f F) where
+instance normCompat : DirectLimit.NormCompat (G F) (f F) where
   norm_compat := by
     intro i j h x
     exact (norm_hom F i j h x).symm
 
-#synth DirectLimit.NormCompat (G F) (UHF_f F)
+#synth DirectLimit.NormCompat (G F) (f F)
 
 
-example : CStarRing (DirectLimit (G F) (UHF_f F)) := by infer_instance
-#synth CStarRing (DirectLimit (G F) (UHF_f F))
+example : CStarRing (DirectLimit (G F) (f F)) := by infer_instance
+#synth CStarRing (DirectLimit (G F) (f F))
 
 open UniformSpace
-noncomputable example : UniformSpace (DirectLimit (G F) (UHF_f F)) := by infer_instance
-#synth CStarAlgebra (Completion (DirectLimit (G F) (UHF_f F)))
+noncomputable example : UniformSpace (DirectLimit (G F) (f F)) := by infer_instance
+#synth CStarAlgebra (Completion (DirectLimit (G F) (f F)))
 
 end UHF.MatrixSystem
 
