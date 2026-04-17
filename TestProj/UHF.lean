@@ -12,25 +12,7 @@ section
 variable {n k : Type*}
 variable [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
 
-
-
-#check amplify
-
-set_option backward.isDefEq.respectTransparency false
-
-#check instCStarRing
-
-#synth NonUnitalNormedRing (Matrix n n ℂ)
-#synth StarRing (Matrix n n ℂ)
-#synth CompleteSpace (Matrix n n ℂ)
-#synth CStarRing (Matrix n n ℂ)
-#synth NormedSpace ℂ (Matrix n n ℂ)
-#synth SMul ℂ (Matrix n n ℂ)
-#synth IsScalarTower ℂ (Matrix n n ℂ) (Matrix n n ℂ)
-#synth SMulCommClass ℂ (Matrix n n ℂ) (Matrix n n ℂ)
-#synth StarModule ℂ (Matrix n n ℂ)
-
-
+set_option backward.isDefEq.respectTransparency false in
 noncomputable instance : CStarAlgebra (Matrix n n ℂ) where
 
 
