@@ -123,6 +123,16 @@ variable (g : ∀ i, G i →⋆ₙ+* A) (Hg : ∀ i j hij x, g j (f i j hij x) =
 
 @[simp] theorem lift_of (i x) : lift G f A g Hg (of G f i x) = g i x := rfl
 
+@[ext]
+theorem hom_ext {g₁ g₂ : DirectLimit G f →⋆ₙ+* A}
+    (h : ∀ i, g₁.comp (of G f i) = g₂.comp (of G f i)) :
+  g₁ = g₂ := by
+  ext x
+  induction x using DirectLimit.induction with | _ i x
+  exact congr($(h i) x)
+
+#check DirectLimit.StarRing.hom_ext_iff
+
 end StarRing
 
 end StarRing
