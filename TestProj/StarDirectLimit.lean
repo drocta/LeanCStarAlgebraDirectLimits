@@ -38,9 +38,6 @@ instance : InvolutiveStar (DirectLimit G f) where
 
 end InvolutiveStar
 
-private lemma of_eq_of_le (i k : ι) (hik : i ≤ k) (x : G i) :
-    (⟦⟨i, x⟩⟧ : DirectLimit G f) = ⟦⟨k, (f i k hik) x⟩⟧ :=
-  eq_of_le (f := f) ⟨i, x⟩ k hik
 
 section StarMul
 variable [∀ i, Mul (G i)] [∀ i j h, MulHomClass (T h) (G i) (G j)]
@@ -146,6 +143,10 @@ instance : StarModule R (DirectLimit G f) where
 
 end StarModule
 
+
+private lemma of_eq_of_le (i k : ι) (hik : i ≤ k) (x : G i) :
+    (⟦⟨i, x⟩⟧ : DirectLimit G f) = ⟦⟨k, (f i k hik) x⟩⟧ :=
+  eq_of_le (f := f) ⟨i, x⟩ k hik
 
 -- TODO: add support for non-unital algebras
 section Algebra
