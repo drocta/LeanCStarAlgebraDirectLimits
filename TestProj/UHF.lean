@@ -73,20 +73,12 @@ universe u
 variable (F : ℕ → Type u)
 variable [∀ n, Fintype (F n)] [∀ n, DecidableEq (F n)] [∀ n, Nonempty (F n)]
 
---variable (F) in
 def N : ℕ → Type u
   | 0 => F 0
   | n + 1 => (N n) × F (n + 1)
 
-#check N F 3
 
 abbrev G n := Matrix (N F n) (N F n) ℂ
-
-variable (n : ℕ)
-set_option trace.Meta.synthInstance true in
-#synth Semiring (G F n)
-#synth Fintype (F n)
-#synth Fintype (N F n)
 
 
 instance : ∀ n, Fintype (N F n) := by
@@ -113,12 +105,6 @@ instance : ∀ n, Nonempty (N F n) := by
     unfold N -- change Nonempty ((N F n) × F (n + 1))
     infer_instance
 
-#synth ∀ n, Semiring (Matrix (N F n) (N F n) ℂ) --now succeeds
-#synth ∀ n, Algebra ℂ (Matrix (N F n) (N F n) ℂ)
-#synth ∀ n, StarRing (Matrix (N F n) (N F n) ℂ)
-
-#synth ∀ n, CStarRing (Matrix (N F n) (N F n) ℂ)
-
 #synth ∀ n, Semiring (G F n)
 
 #synth ∀ n, Semiring (G F n)
@@ -131,8 +117,6 @@ instance : ∀ n, Nonempty (N F n) := by
 
 noncomputable def step (n : ℕ) : (G F n) →⋆ₐ[ℂ] (G F (n+1)) :=
   amplify (N F n) (F (n+1))
-
-
 
 noncomputable def hom {n m : ℕ} (h : n ≤ m) : G F n →⋆ₐ[ℂ] G F m :=
   Nat.leRecOn (C := fun t => G F n →⋆ₐ[ℂ] G F t) h
@@ -180,11 +164,10 @@ instance directedSystem : DirectedSystem (G F) (fun _i _j hij => hom (F := F) hi
     rw [hom_trans (F := F) hij hjk]
     simp
 
-#check directedSystem
 
 #check DirectLimit (G F) (fun _i _j hij => hom (F := F) hij)
 
-
+--this one actually uses the hypothesis that the F n are nonempty.
 lemma norm_hom (i j : ℕ) (hij : i ≤ j) (x : G F i) :
     ‖(hom (F := F) hij x : G F j)‖ = ‖(x : G F i)‖ := by
   induction hij using Nat.leRec with
@@ -198,11 +181,6 @@ lemma norm_hom (i j : ℕ) (hij : i ≤ j) (x : G F i) :
       rw [StarAlgHom.comp_apply]
       --unfold step
       exact norm_amplify (N F j') (F (j' + 1)) ((hom F hij') x)
-
-
-
-#synth ∀ i, CStarRing (G F i)
-#synth ∀ i, CStarAlgebra (G F i)
 
 
 abbrev UHF_T {i j : ℕ} (hij : i ≤ j) := G F i →⋆ₐ[ℂ] G F j
