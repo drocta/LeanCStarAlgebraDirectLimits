@@ -53,7 +53,7 @@ end
 section UHF
 universe u
 variable (F : ℕ → Type u)
-variable [∀ n, Fintype (F n)] [∀ n, DecidableEq (F n)] [∀ n, Nonempty (F n)]
+variable [∀ n, Fintype (F n)] [∀ n, DecidableEq (F n)]
 
 namespace UHF.MatrixSystem
 
@@ -81,7 +81,7 @@ instance : ∀ n, DecidableEq (N F n) := by
     change DecidableEq ((N F n) × F (n + 1)) -- `unfold N` also works here
     infer_instance
 
-instance : ∀ n, Nonempty (N F n) := by
+instance [∀ n, Nonempty (F n)] : ∀ n, Nonempty (N F n) := by
   intro n
   induction n with
   | zero => change Nonempty (F 0); infer_instance
@@ -109,20 +109,17 @@ noncomputable def hom {n m : ℕ} (h : n ≤ m) : G F n →⋆ₐ[ℂ] G F m :=
 
 
 
-omit [∀ (n : ℕ), Nonempty (F n)] in
 lemma hom_refl (n : ℕ) :
     hom (F := F) (n := n) (m := n) le_rfl = StarAlgHom.id ℂ (G F n) := by
   unfold hom
   rw [Nat.leRecOn_self]
 
-omit [∀ (n : ℕ), Nonempty (F n)] in
 lemma hom_succ {n m : ℕ} (h : n ≤ m) :
     hom (F := F) (Nat.le_succ_of_le h) =
       (step F m).comp (hom (F := F) h) := by
   unfold hom
   apply Nat.leRecOn_succ
 
-omit [∀ (n : ℕ), Nonempty (F n)] in
 lemma hom_trans {i j k : ℕ} (hij : i ≤ j) (hjk : j ≤ k) :
     (hom (F := F) (Nat.le_trans hij hjk) : G F i →⋆ₐ[ℂ] G F k) =
       (hom (F := F) hjk).comp (hom (F := F) hij) := by
@@ -135,7 +132,6 @@ lemma hom_trans {i j k : ℕ} (hij : i ≤ j) (hjk : j ≤ k) :
     rfl
 
 
-omit [∀ (n : ℕ), Nonempty (F n)] in
 instance directedSystem : DirectedSystem (G F) (fun _i _j hij => hom (F := F) hij) where
   map_self := by
     intro i x
@@ -149,7 +145,7 @@ instance directedSystem : DirectedSystem (G F) (fun _i _j hij => hom (F := F) hi
 
 #check DirectLimit (G F) (fun _i _j hij => hom (F := F) hij)
 
---this one actually uses the hypothesis that the F n are nonempty.
+variable [∀ n, Nonempty (F n)]
 lemma norm_hom (i j : ℕ) (hij : i ≤ j) (x : G F i) :
     ‖(hom (F := F) hij x : G F j)‖ = ‖(x : G F i)‖ := by
   induction hij using Nat.leRec with
