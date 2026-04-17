@@ -9,16 +9,14 @@ open scoped Matrix.Norms.L2Operator
 
 section
 
-variable {𝕜 n k : Type*}
-variable [RCLike 𝕜] [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
+variable {n k : Type*}
+variable [Fintype n] [DecidableEq n] [Fintype k] [DecidableEq k]
 
-set_option backward.isDefEq.respectTransparency false in
-example : CStarRing (Matrix n n 𝕜) := instCStarRing
+
 
 #check amplify
 
 set_option backward.isDefEq.respectTransparency false
-#synth CStarRing (Matrix n n 𝕜)
 
 #check instCStarRing
 
@@ -32,11 +30,9 @@ set_option backward.isDefEq.respectTransparency false
 #synth SMulCommClass ℂ (Matrix n n ℂ) (Matrix n n ℂ)
 #synth StarModule ℂ (Matrix n n ℂ)
 
---not sure why this is necessary...
+
 noncomputable instance : CStarAlgebra (Matrix n n ℂ) where
 
-
-#synth NonUnitalCStarAlgebra (Matrix n n ℂ)
 
 /- This proof is specific to square matrices over complex numbers,
 and relies on them forming a C*-algebra.
