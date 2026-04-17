@@ -55,6 +55,8 @@ universe u
 variable (F : ℕ → Type u)
 variable [∀ n, Fintype (F n)] [∀ n, DecidableEq (F n)] [∀ n, Nonempty (F n)]
 
+namespace UHF.MatrixSystem
+
 def N : ℕ → Type u
   | 0 => F 0
   | n + 1 => (N n) × F (n + 1)
@@ -133,8 +135,6 @@ lemma hom_trans {i j k : ℕ} (hij : i ≤ j) (hjk : j ≤ k) :
     rfl
 
 
-
-
 omit [∀ (n : ℕ), Nonempty (F n)] in
 instance directedSystem : DirectedSystem (G F) (fun _i _j hij => hom (F := F) hij) where
   map_self := by
@@ -196,5 +196,7 @@ instance normCompat : DirectLimit.NormCompat (G F) (UHF_f F) where
 
 open UniformSpace
 #synth CStarAlgebra (Completion (DirectLimit (G F) (UHF_f F)))
+
+end UHF.MatrixSystem
 
 end UHF
