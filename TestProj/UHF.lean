@@ -87,7 +87,7 @@ def N : ℕ → Type u
 
 #check N F 3
 
-def G n := Matrix (N F n) (N F n) ℂ
+abbrev G n := Matrix (N F n) (N F n) ℂ
 
 variable (n : ℕ)
 set_option trace.Meta.synthInstance true in
@@ -141,6 +141,14 @@ instance : ∀ n, Nonempty (N F n) := by
 
 #synth ∀ n, Semiring (G F n)
 
+#synth ∀ n, Semiring (G F n)
+#synth ∀ n, Algebra ℂ (G F n)
+#synth ∀ n, StarRing (G F n)
+#synth ∀ n, NormedRing (G F n)
+#synth ∀ n, CStarRing (G F n)
+#synth ∀ n, CStarAlgebra (G F n)
+
+/-
 instance : ∀ n, Semiring (G F n) := by
   intro n
   change Semiring (Matrix (N F n) (N F n) ℂ)
@@ -151,12 +159,14 @@ instance : ∀ n, Algebra ℂ (G F n) := by
   change Algebra ℂ (Matrix (N F n) (N F n) ℂ)
   infer_instance
 
+
 variable {F} in
 noncomputable instance instStarRing {n : ℕ} : StarRing (G F n) := by
   --intro n
   unfold G
   change StarRing (Matrix (N F n) (N F n) ℂ)
   infer_instance
+
 
 set_option trace.Meta.synthInstance true in
 #synth ∀ i, StarRing (G F i)
@@ -190,10 +200,13 @@ noncomputable instance {n : ℕ} :
   change CStarRing (Matrix (N F n) (N F n) ℂ)
   apply instCStarRing
 
+
 noncomputable instance : ∀ n, CStarAlgebra (G F n) := by
   intro n
   change CStarAlgebra (Matrix (N F n) (N F n) ℂ)
   infer_instance
+
+-/
 
 #synth ∀ i, CStarAlgebra (G F i)
 
@@ -314,6 +327,13 @@ instance normCompat : DirectLimit.NormCompat (G F) (UHF_f F) where
 #synth StarRing (DirectLimit (G F) (UHF_f F))
 #synth ∀ i, NormedRing (G F i)
 #synth ∀ i, StarRing (G F i)
+#synth NormedRing (DirectLimit (G F) (UHF_f F))
+#synth CStarRing (DirectLimit (G F) (UHF_f F))
+
+open UniformSpace
+#synth CStarAlgebra (Completion (DirectLimit (G F) (UHF_f F)))
+
+
 #check DirectLimit.instNormedRing (G := (G F)) (f := UHF_f F)
 set_option trace.Meta.synthInstance true in
 #synth NormedRing (DirectLimit (G F) (UHF_f F))
