@@ -1,8 +1,8 @@
 import Mathlib.Analysis.CStarAlgebra.Matrix
---import TestProj.CStar
+import Mathlib.Order.DirectedInverseSystem
+import TestProj.CStar
 import TestProj.amplify
 import Mathlib.Analysis.CStarAlgebra.Hom
---import Mathlib.Analysis.CStarAlgebra.Classes
 
 open Matrix
 open scoped Matrix.Norms.L2Operator
@@ -19,6 +19,8 @@ example : CStarRing (Matrix n n 𝕜) := instCStarRing
 
 set_option backward.isDefEq.respectTransparency false
 #synth CStarRing (Matrix n n 𝕜)
+
+#check instCStarRing
 /-
 NonUnitalNormedRing A, StarRing A, CompleteSpace A,
     CStarRing A, NormedSpace ℂ A, IsScalarTower ℂ A A, SMulCommClass ℂ A A, StarModule ℂ A
@@ -34,7 +36,7 @@ NonUnitalNormedRing A, StarRing A, CompleteSpace A,
 #synth StarModule ℂ (Matrix n n ℂ)
 
 --not sure why this is necessary...
-noncomputable local instance : NonUnitalCStarAlgebra (Matrix n n ℂ) where
+noncomputable instance : CStarAlgebra (Matrix n n ℂ) where
 
 
 #synth NonUnitalCStarAlgebra (Matrix n n ℂ)
@@ -135,6 +137,8 @@ instance : ∀ n, Nonempty (N F n) := by
 #synth ∀ n, Algebra ℂ (Matrix (N F n) (N F n) ℂ)
 #synth ∀ n, StarRing (Matrix (N F n) (N F n) ℂ)
 
+#synth ∀ n, CStarRing (Matrix (N F n) (N F n) ℂ)
+
 #synth ∀ n, Semiring (G F n)
 
 instance : ∀ n, Semiring (G F n) := by
@@ -147,11 +151,51 @@ instance : ∀ n, Algebra ℂ (G F n) := by
   change Algebra ℂ (Matrix (N F n) (N F n) ℂ)
   infer_instance
 
-noncomputable local instance : ∀ n, StarRing (G F n) := by
-  intro n
+variable {F} in
+noncomputable instance instStarRing {n : ℕ} : StarRing (G F n) := by
+  --intro n
   unfold G
   change StarRing (Matrix (N F n) (N F n) ℂ)
   infer_instance
+
+set_option trace.Meta.synthInstance true in
+#synth ∀ i, StarRing (G F i)
+
+set_option trace.Meta.synthInstance true in
+#synth StarRing (G F 5)
+
+set_option trace.Meta.synthInstance true in
+noncomputable example (i : ℕ) : StarRing (G F i) := inferInstance
+
+noncomputable instance (n : ℕ) : NormedRing (G F n) := by
+  --intro n
+  change NormedRing (Matrix (N F n) (N F n) ℂ)
+  infer_instance
+
+set_option diagnostics true
+set_option trace.Meta.synthInstance true in
+#synth StarRing (G F 5)
+
+
+set_option trace.Meta.synthInstance true in
+#synth StarRing (G F 0)
+set_option trace.Meta.synthInstance true in
+noncomputable example (i : ℕ) : StarRing (G F i) := inferInstance
+
+noncomputable instance {n : ℕ} :
+    --letI : ∀ n, StarRing (G F n) := fun n => instStarRing (n := n)
+    letI : StarRing (G F n) := instStarRing (n := n)
+    CStarRing (G F n) := by
+  --intro n
+  change CStarRing (Matrix (N F n) (N F n) ℂ)
+  apply instCStarRing
+
+noncomputable instance : ∀ n, CStarAlgebra (G F n) := by
+  intro n
+  change CStarAlgebra (Matrix (N F n) (N F n) ℂ)
+  infer_instance
+
+#synth ∀ i, CStarAlgebra (G F i)
 
 noncomputable def step (n : ℕ) : (G F n) →⋆ₐ[ℂ] (G F (n+1)) :=
   amplify (N F n) (F (n+1))
@@ -201,6 +245,90 @@ lemma hom_trans {i j k : ℕ} (hij : i ≤ j) (hjk : j ≤ k) :
     rw [hom_succ (F := F) (h := hjk)]
     rfl
 
+
+
+
+omit [∀ (n : ℕ), Nonempty (F n)] in
+instance directedSystem : DirectedSystem (G F) (fun _i _j hij => hom (F := F) hij) where
+  map_self := by
+    intro i x
+    rw [hom_refl (F := F) i]
+    simp
+  map_map := by
+    intro i j k hij hjk x
+    rw [hom_trans (F := F) hij hjk]
+    simp
+
+#check directedSystem
+
+#check DirectLimit (G F) (fun _i _j hij => hom (F := F) hij)
+
+
+lemma norm_hom (i j : ℕ) (hij : i ≤ j) (x : G F i) :
+    ‖(hom (F := F) hij x : G F j)‖ = ‖(x : G F i)‖ := by
+  induction hij using Nat.leRec with
+  | refl =>
+      rw [hom_refl]
+      simp
+  | @le_succ_of_le j' hij' ih =>
+      have h := hom_succ (F := F) (h := hij')
+      rw [h]
+      rw [← ih]
+      rw [StarAlgHom.comp_apply]
+      --unfold step
+      exact norm_amplify (N F j') (F (j' + 1)) ((hom F hij') x)
+      --rw [norm_amplify (N F j') (F (j' + 1)) ((hom F hij') x)]
+      --rw [NonUnitalStarAlgHom.norm_map (φ := step F j') (amplify_injective _ _) ((hom F hij') x)]
+      --exact NonUnitalStarAlgHom.norm_map (φ := step F j') (amplify_injective _ _) ((hom F hij') x)
+
+
+
+#synth ∀ i, CStarRing (G F i)
+#synth ∀ i, CStarAlgebra (G F i)
+
+
+abbrev UHF_T {i j : ℕ} (hij : i ≤ j) := G F i →⋆ₐ[ℂ] G F j
+noncomputable abbrev UHF_f (i j : ℕ) (hij : i ≤ j) : UHF_T F hij:= hom (F := F) hij
+#check UHF_f
+
+#check DirectLimit (G F) (UHF_f F)
+
+#synth ∀ i j (hij : i ≤ j), FunLike (UHF_T F hij) (G F i) (G F j)
+#synth ∀ i j h, StarHomClass (UHF_T F h) (G F i) (G F j)
+#synth ∀ i j h, AlgHomClass (UHF_T F h) ℂ (G F i) (G F j)
+
+
+#check DirectLimit.NormCompat (G F) (UHF_f F)
+#synth DirectLimit.NormCompat (G F) (UHF_f F)
+
+variable {F} in
+instance normCompat : DirectLimit.NormCompat (G F) (UHF_f F) where
+  norm_compat := by
+    intro i j h x
+    exact (norm_hom F i j h x).symm
+
+#synth DirectLimit.NormCompat (G F) (UHF_f F)
+
+#synth Norm (DirectLimit (G F) (UHF_f F))
+#synth Star (DirectLimit (G F) (UHF_f F))
+#synth StarRing (DirectLimit (G F) (UHF_f F))
+#synth ∀ i, NormedRing (G F i)
+#synth ∀ i, StarRing (G F i)
+#check DirectLimit.instNormedRing (G := (G F)) (f := UHF_f F)
+set_option trace.Meta.synthInstance true in
+#synth NormedRing (DirectLimit (G F) (UHF_f F))
+set_option trace.Meta.synthInstance true in
+#synth (
+  letI : DirectLimit.NormCompat (ι := ℕ)  (G F) (UHF_f F) := inferInstance
+  letI : NormedRing (DirectLimit (ι := ℕ) (G F) (UHF_f F)) := DirectLimit.instNormedRing (G := (G F)) (f := UHF_f F)
+  NormedRing (DirectLimit (ι := ℕ)  (G F) (UHF_f F)))
+
+set_option trace.Meta.synthInstance true in
+#synth (letI : DirectLimit.NormCompat (G F) (UHF_f F) := inferInstance
+  letI := DirectLimit.instNormedRing (G := (G F)) (f := UHF_f F)
+  letI : StarRing (DirectLimit (G F) (UHF_f F)) := DirectLimit.instStarRing_testProj
+  CStarRing (DirectLimit (ι := ℕ) (G F) (UHF_f F)))
+#synth @CStarRing (DirectLimit (G F) (UHF_f F)) (DirectLimit.instNonUnitalNormedRing (G := (G F)) (f := UHF_f F)) _
 
   /-
     apply Nat.leRecOn (C := fun k =>
