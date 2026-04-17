@@ -89,7 +89,6 @@ instance : ∀ n, Nonempty (N F n) := by
     change Nonempty ((N F n) × F (n + 1)) -- `unfold N` also works here
     infer_instance
 
-#synth ∀ n, Semiring (G F n)
 
 #synth ∀ n, Semiring (G F n)
 #synth ∀ n, Algebra ℂ (G F n)
@@ -187,15 +186,12 @@ instance normCompat : DirectLimit.NormCompat (G F) (UHF_f F) where
 
 #synth DirectLimit.NormCompat (G F) (UHF_f F)
 
-#synth Norm (DirectLimit (G F) (UHF_f F))
-#synth Star (DirectLimit (G F) (UHF_f F))
-#synth StarRing (DirectLimit (G F) (UHF_f F))
-#synth ∀ i, NormedRing (G F i)
-#synth ∀ i, StarRing (G F i)
-#synth NormedRing (DirectLimit (G F) (UHF_f F))
+
+example : CStarRing (DirectLimit (G F) (UHF_f F)) := by infer_instance
 #synth CStarRing (DirectLimit (G F) (UHF_f F))
 
 open UniformSpace
+noncomputable example : UniformSpace (DirectLimit (G F) (UHF_f F)) := by infer_instance
 #synth CStarAlgebra (Completion (DirectLimit (G F) (UHF_f F)))
 
 end UHF.MatrixSystem
