@@ -105,7 +105,7 @@ noncomputable def of (i) : G i →⋆ₙ+* DirectLimit G f where
 
 @[simp] lemma of_f {i j} (hij) (x) : of G f j (f i j hij x) = of G f i x := .symm <| eq_of_le ..
 
-variable (A : Type*) [NonAssocSemiring A] [StarRing A]
+variable (A : Type*) [NonUnitalNonAssocSemiring A] [StarRing A]
 variable (G f) in
 /-- The universal property of the direct limit: maps from the components to another ring
 that respect the directed system structure (i.e. make some diagram commute) give rise
@@ -135,8 +135,7 @@ section StarModule
 variable {R : Type*} [Semiring R] [Star R]
 variable [∀ i, Star (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
 variable [∀ i, SMul R (G i)] [∀ i j h, MulActionHomClass (T h) R (G i) (G j)]
-variable [∀ i, AddZero (G i)]
-variable [∀ i, StarModule R (G i)] [∀ i j h, AddMonoidHomClass (T h) (G i) (G j)]
+variable [∀ i, StarModule R (G i)]
 
 instance : StarModule R (DirectLimit G f) where
   star_smul := by
