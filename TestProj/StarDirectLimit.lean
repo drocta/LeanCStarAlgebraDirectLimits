@@ -127,7 +127,7 @@ section StarModule
 
 variable {R : Type*}
 
-instance [Semiring R] [Star R] [∀ i, Star (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
+instance [Star R] [∀ i, Star (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
     [∀ i, SMul R (G i)] [∀ i j h, MulActionHomClass (T h) R (G i) (G j)]
     [∀ i, StarModule R (G i)] :
     StarModule R (DirectLimit G f) where
