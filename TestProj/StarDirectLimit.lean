@@ -125,17 +125,14 @@ end StarRing
 
 section StarModule
 
-variable {R : Type*} [Semiring R] [Star R]
-variable [∀ i, Star (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
-variable [∀ i, SMul R (G i)] [∀ i j h, MulActionHomClass (T h) R (G i) (G j)]
-variable [∀ i, StarModule R (G i)]
+variable {R : Type*}
 
-instance : StarModule R (DirectLimit G f) where
-  star_smul := by
-    intro r
-    apply DirectLimit.induction
-    intro i x
-    rw [star_def, smul_def, smul_def, ← star_smul, star_def]
+instance [Semiring R] [Star R] [∀ i, Star (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
+    [∀ i, SMul R (G i)] [∀ i j h, MulActionHomClass (T h) R (G i) (G j)]
+    [∀ i, StarModule R (G i)] :
+    StarModule R (DirectLimit G f) where
+  star_smul r := DirectLimit.induction _ fun i x ↦ by
+    simp_rw [star_def, smul_def, ← star_smul, star_def]
 
 end StarModule
 
