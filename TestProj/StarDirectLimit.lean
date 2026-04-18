@@ -44,11 +44,7 @@ variable [∀ i, Mul (G i)] [∀ i j h, MulHomClass (T h) (G i) (G j)]
 variable [∀ i, StarMul (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
 
 instance : StarMul (DirectLimit G f) where
-  star_mul := by
-    intro r s
-    induction r, s using DirectLimit.induction₂ with
-    | ih i x y =>
-      rw [mul_def, star_def, star_def, star_def, star_mul, mul_def]
+  star_mul := DirectLimit.induction₂ _ fun i _ _ ↦ by simp_rw [mul_def, star_def, star_mul, mul_def]
 
 end StarMul
 
