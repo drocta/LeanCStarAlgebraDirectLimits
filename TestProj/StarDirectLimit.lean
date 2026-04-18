@@ -58,11 +58,7 @@ using DirectLimit.instAddMonoid-/
 variable [Nonempty ι]
 
 instance : StarAddMonoid (DirectLimit G f) where
-  star_add := by
-    intro r s
-    induction r, s using DirectLimit.induction₂ with
-    | ih i x y =>
-      rw [add_def, star_def, star_def, star_def, add_def, star_add]
+  star_add := DirectLimit.induction₂ _ fun i _ _ ↦ by simp_rw [add_def, star_def, star_add, add_def]
 
 end StarAddMonoid
 
