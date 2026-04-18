@@ -64,24 +64,18 @@ end StarAddMonoid
 
 section StarRing
 /- Reminder : `StarRing`s are not required to be unital. -/
+variable [Nonempty ι]
+
+instance [∀ i, NonUnitalNonAssocSemiring (G i)] [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
+    [∀ i, StarRing (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
+    : StarRing (DirectLimit G f) where
+  star_mul := DirectLimit.induction₂ _ fun i _ _ ↦ by simp_rw [mul_def, star_def, star_mul, mul_def]
+  star_add := DirectLimit.induction₂ _ fun i _ _ ↦ by simp_rw [add_def, star_def, star_add, add_def]
+
+namespace StarRing
 
 variable [∀ i, NonUnitalNonAssocSemiring (G i)] [∀ i j h, NonUnitalRingHomClass (T h) (G i) (G j)]
 variable [∀ i, StarRing (G i)] [∀ i j h, StarHomClass (T h) (G i) (G j)]
-variable [Nonempty ι]
-instance : StarRing (DirectLimit G f) where
-  star_mul := by
-    intro r s
-    induction r, s using DirectLimit.induction₂ with
-    | ih i x y =>
-      rw [mul_def, star_def, star_def, star_def, mul_def, star_mul]
-  star_add := by
-    intro r s
-    induction r, s using DirectLimit.induction₂ with
-    | ih i x y =>
-      rw [add_def, star_def, star_def, star_def, add_def, star_add]
-
-
-namespace StarRing
 
 variable (G f) in
 /-- The canonical map from a component to the direct limit. -/
