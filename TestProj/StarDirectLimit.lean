@@ -241,20 +241,10 @@ lemma algebraMapAux_at (i : ι) (r : R) :
 
 noncomputable instance : Algebra R (DirectLimit G f) where
   algebraMap := algebraMapAux
-  commutes' := by
-    intro r x
-    induction x using DirectLimit.induction with
-      |ih i y =>
-        rw [algebraMapAux_at i, mul_def, mul_def, Algebra.commutes]
-
-  smul_def' := by
-    intro r x
-    induction x using DirectLimit.induction with
-      |ih i y =>
-        rw [smul_def]
-        let j := Classical.arbitrary ι
-        rw [algebraMapAux_at i, mul_def, Algebra.smul_def']
-        rfl
+  commutes' r := DirectLimit.induction f fun i _ ↦ by
+    rw [algebraMapAux_at i, mul_def, mul_def, Algebra.commutes]
+  smul_def' r := DirectLimit.induction _ fun i _ => by
+    rw [smul_def, algebraMapAux_at i, mul_def, Algebra.smul_def']; rfl
 
 lemma algebraMap_at (i : ι) (r : R) :
     algebraMap R (DirectLimit G f) r = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) := by
