@@ -155,24 +155,13 @@ variable [∀ i, Algebra R (G i)] [∀ i j h, AlgHomClass (T h) R (G i) (G j)]
 
 /- TODO: Perhaps all the places I use `Classical.arbitrary ι` could instead be using
 `DirectLimit.map₀` and `DirectLimit.map₀_def`-/
-noncomputable def algebraMapAux : R →+* DirectLimit G f :={
-    toFun := fun r => ⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧
-    map_one' := by
-      simp only [algebraMap]
-      rw [RingHom.map_one]
-      rfl
-    map_mul' := by
-      intro r s
-      simp only [algebraMap]
-      rw [mul_def]
-      simp only [map_mul]
-    map_add' := by
-      intro r s
-      simp only [algebraMap, add_def, map_add]
-    map_zero' := by
-      simp only [algebraMap, map_zero]
-      exact zero_def (f:=f) (Classical.arbitrary ι)
-  }
+noncomputable def algebraMapAux : R →+* DirectLimit G f where
+  toFun := fun r => ⟦⟨Classical.arbitrary ι, algebraMap R (G (Classical.arbitrary ι)) r⟩⟧
+  map_one' := by rw [algebraMap, RingHom.map_one, one_def]
+  map_mul' := fun r s => by rw [algebraMap, mul_def, map_mul]
+  map_add' := fun r s => by simp only [algebraMap, add_def, map_add]
+  map_zero' := by rw [algebraMap, map_zero, zero_def]
+
 
 /- an attempt at defining the algebra map via DirectLimit.map₀ , which I thought would be simpler,
   and maybe more idiomatic, but it turned out longer,
