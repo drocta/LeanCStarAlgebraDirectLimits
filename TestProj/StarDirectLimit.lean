@@ -263,15 +263,9 @@ noncomputable def of2 (i : ι) : G i →ₐ[R] DirectLimit G f where
   commutes' := by intro r; rw [algebraMap_at i]
 
 variable (G f) in
-noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f :=
-{(DirectLimit.Ring.of G f i) with
-  commutes' := by
-    intro r
-    rw [RingHom.toFun_eq_coe]
-    rw [algebraMap_at i]
-    rw [show (DirectLimit.Ring.of G f i) (algebraMap R (G i) r)
-          = (⟦⟨i, algebraMap R (G i) r⟩⟧ : DirectLimit G f) by rfl]
-}
+noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f where
+  __ := (DirectLimit.Ring.of G f i)
+  commutes' r := by rw [RingHom.toFun_eq_coe, algebraMap_at i]; rfl
 
 variable (A : Type*) [Semiring A] [Algebra R A]
 
