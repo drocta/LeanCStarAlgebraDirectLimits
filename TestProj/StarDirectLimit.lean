@@ -275,8 +275,8 @@ that respect the directed system structure (i.e. make some diagram commute) give
 to a unique map out of the direct limit.
 -/
 noncomputable def lift (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
-    DirectLimit G f →ₐ[R] A :=
-{(DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)) with
+    DirectLimit G f →ₐ[R] A where
+  __ := DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)
   commutes' := by
     let i := Classical.arbitrary ι
     intro r
@@ -294,8 +294,6 @@ noncomputable def lift (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f 
       _ = (g i).toRingHom (algMap_Gi r) := lift_of
       _ = (g i) (algMap_Gi r) := by rfl
       _ = algMap_A r := by rw [AlgHom.commutes]
-}
-
 
 variable (G f) in
 /-- The universal property of the direct limit: maps from the components to another R-algebra
