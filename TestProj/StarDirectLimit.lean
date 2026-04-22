@@ -1,5 +1,5 @@
 import Mathlib.Algebra.Colimit.DirectLimit
-import Mathlib.Algebra.Star.StarRingHom
+import Mathlib.Algebra.Star.StarAlgHom
 import Mathlib.Algebra.Algebra.Defs
 import Mathlib.Algebra.Algebra.Hom
 
@@ -267,41 +267,28 @@ noncomputable def of (i : ι) : G i →ₐ[R] DirectLimit G f where
   __ := (DirectLimit.Ring.of G f i)
   commutes' r := by rw [RingHom.toFun_eq_coe, algebraMap_at i]; rfl
 
-variable (A : Type*) [Semiring A] [Algebra R A]
+variable (P : Type*) [Semiring P] [Algebra R P]
 
 variable (G f) in
 /-- The universal property of the direct limit: maps from the components to another R-algebra
 that respect the directed system structure (i.e. make some diagram commute) give rise
 to a unique map out of the direct limit.
 -/
-noncomputable def lift (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
-    DirectLimit G f →ₐ[R] A where
-  __ := DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)
-  commutes' := by
+noncomputable def lift (g : ∀ i, G i →ₐ[R] P) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+    DirectLimit G f →ₐ[R] P where
+  toFun := _root_.DirectLimit.lift _ (g · ·) fun i j h x ↦ (Hg i j h x).symm
+  __ := DirectLimit.Ring.lift G f P (g:= fun i => (g i).toRingHom) (Hg:=Hg)
+  commutes' r := by
     let i := Classical.arbitrary ι
-    intro r
-    let of := Algebra.of G f i
-    let ring_of := of.toRingHom
-    let algMap_limit := algebraMap R (DirectLimit G f)
-    let algMap_Gi := algebraMap R (G i)
-    let algMap_A := algebraMap R A
-    let lift := DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)
-    have lift_of : lift (ring_of (algMap_Gi r)) = (g i).toRingHom (algMap_Gi r) :=
-      DirectLimit.Ring.lift_of A (g:= fun i => (g i).toRingHom) Hg i (algMap_Gi r)
-    calc
-      lift (algMap_limit r) = lift (of (algMap_Gi r)) := by rw [AlgHom.commutes]
-      _ = lift (ring_of (algMap_Gi r)) := by rfl
-      _ = (g i).toRingHom (algMap_Gi r) := lift_of
-      _ = (g i) (algMap_Gi r) := by rfl
-      _ = algMap_A r := by rw [AlgHom.commutes]
+    rw [algebraMap_at i r, lift_def, AlgHom.commutes]
 
 variable (G f) in
 /-- The universal property of the direct limit: maps from the components to another R-algebra
 that respect the directed system structure (i.e. make some diagram commute) give rise
 to a unique map out of the direct limit.
 -/
-noncomputable def lift2 (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
-    DirectLimit G f →ₐ[R] A where
+noncomputable def lift2 (g : ∀ i, G i →ₐ[R] P) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+    DirectLimit G f →ₐ[R] P where
   toFun := _root_.DirectLimit.lift _ (g · ·) fun i j h x ↦ (Hg i j h x).symm
   map_one' := by rw [one_def (Classical.arbitrary ι), lift_def, map_one]
   map_mul' := DirectLimit.induction₂ _ fun i x y ↦ by simp_rw [mul_def, lift_def, map_mul]
@@ -314,10 +301,10 @@ noncomputable def lift2 (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f
     let ring_of := of.toRingHom
     let algMap_limit := algebraMap R (DirectLimit G f)
     let algMap_Gi := algebraMap R (G i)
-    let algMap_A := algebraMap R A
-    let lift := DirectLimit.Ring.lift G f A (g:= fun i => (g i).toRingHom) (Hg:=Hg)
+    let algMap_A := algebraMap R P
+    let lift := DirectLimit.Ring.lift G f P (g:= fun i => (g i).toRingHom) (Hg:=Hg)
     have lift_of : lift (ring_of (algMap_Gi r)) = (g i).toRingHom (algMap_Gi r) :=
-      DirectLimit.Ring.lift_of A (g:= fun i => (g i).toRingHom) Hg i (algMap_Gi r)
+      DirectLimit.Ring.lift_of P (g:= fun i => (g i).toRingHom) Hg i (algMap_Gi r)
     calc
       lift (algMap_limit r) = lift (of (algMap_Gi r)) := by rw [AlgHom.commutes]
       _ = lift (ring_of (algMap_Gi r)) := by rfl
@@ -325,11 +312,18 @@ noncomputable def lift2 (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f
       _ = (g i) (algMap_Gi r) := by rfl
       _ = algMap_A r := by rw [AlgHom.commutes]
 
-variable (g : ∀ i, G i →ₐ[R] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x)
-@[simp] theorem lift_of (i x) : lift G f A g Hg (of G f i x) = g i x := rfl
+variable (g : ∀ i, G i →ₐ[R] P) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x)
+@[simp] theorem lift_of (i x) : lift G f P g Hg (of G f i x) = g i x := rfl
 
-@[simp] theorem lift2_of2 (i x) : lift2 G f A g Hg (of2 G f i x) = g i x := rfl
+@[simp] theorem lift2_of2 (i x) : lift2 G f P g Hg (of2 G f i x) = g i x := rfl
 
+@[ext]
+theorem hom_ext {g₁ g₂ : DirectLimit G f →ₐ[R] P}
+    (h : ∀ i, g₁.comp (of G f i) = g₂.comp (of G f i)) :
+    g₁ = g₂ := by
+  ext x
+  induction x using DirectLimit.induction with | _ i x
+  exact congr($(h i) x)
 
 end Algebra
 
