@@ -61,32 +61,30 @@ variable [∀ i j h, AddMonoidHomClass (T h) (G i) (G j)]
 set_option diagnostics true in
 #synth AddGroup (DirectLimit G f)
 
-noncomputable instance instMetricSpaceOfNormedAddGroup : MetricSpace (DirectLimit G f) := by
-  exact {
-    dist := fun x y => ‖x - y‖
-    dist_self := by
-      apply DirectLimit.induction (C := fun x => ‖x - x‖ = 0)
-      intro i y
-      rw [sub_def, norm_def]
-      rw[← NormedAddGroup.dist_eq, dist_self]
-    dist_comm := by
-      apply DirectLimit.induction₂ (C := fun x y => ‖x - y‖ = ‖y - x‖)
-      intro i x y
-      rw [sub_def, sub_def, norm_def, norm_def]
-      rw [← NormedAddGroup.dist_eq, ← NormedAddGroup.dist_eq, dist_comm]
-    dist_triangle := by
-      apply DirectLimit.induction₃ (C := fun x y z => ‖x - z‖ ≤ ‖x - y‖ + ‖y - z‖)
-      intro i x y z
-      simp_rw [sub_def, norm_def, ← NormedAddGroup.dist_eq]
-      apply dist_triangle
-    eq_of_dist_eq_zero := by
-      apply DirectLimit.induction₂ (C := fun x y => ‖x - y‖ = 0 → x = y)
-      intro i x y h
-      rw [sub_def, norm_def] at h
-      rw [← NormedAddGroup.dist_eq] at h
-      have h' : x = y := eq_of_dist_eq_zero (x := x) (y := y) h
-      rw [h']
-  }
+noncomputable instance instMetricSpaceOfNormedAddGroup : MetricSpace (DirectLimit G f) where
+  dist := fun x y => ‖x - y‖
+  dist_self := by
+    apply DirectLimit.induction (C := fun x => ‖x - x‖ = 0)
+    intro i y
+    rw [sub_def, norm_def]
+    rw[← NormedAddGroup.dist_eq, dist_self]
+  dist_comm := by
+    apply DirectLimit.induction₂ (C := fun x y => ‖x - y‖ = ‖y - x‖)
+    intro i x y
+    rw [sub_def, sub_def, norm_def, norm_def]
+    rw [← NormedAddGroup.dist_eq, ← NormedAddGroup.dist_eq, dist_comm]
+  dist_triangle := by
+    apply DirectLimit.induction₃ (C := fun x y z => ‖x - z‖ ≤ ‖x - y‖ + ‖y - z‖)
+    intro i x y z
+    simp_rw [sub_def, norm_def, ← NormedAddGroup.dist_eq]
+    apply dist_triangle
+  eq_of_dist_eq_zero := by
+    apply DirectLimit.induction₂ (C := fun x y => ‖x - y‖ = 0 → x = y)
+    intro i x y h
+    rw [sub_def, norm_def] at h
+    rw [← NormedAddGroup.dist_eq] at h
+    have h' : x = y := eq_of_dist_eq_zero (x := x) (y := y) h
+    rw [h']
 
 noncomputable instance instNormedAddGroup : NormedAddGroup (DirectLimit G f) where
 
