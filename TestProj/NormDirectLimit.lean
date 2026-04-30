@@ -77,10 +77,7 @@ noncomputable instance instMetricSpaceOfNormedAddGroup : MetricSpace (DirectLimi
     dist_triangle := by
       apply DirectLimit.induction₃ (C := fun x y z => ‖x - z‖ ≤ ‖x - y‖ + ‖y - z‖)
       intro i x y z
-      -- shorter to say `simp only [sub_def, norm_def]`, but unsure if better
-      rw [sub_def, sub_def, sub_def, norm_def, norm_def, norm_def]
-      -- shorter to say `simp only [← NormedAddGroup.dist_eq]`, but unsure if better
-      rw [← NormedAddGroup.dist_eq, ← NormedAddGroup.dist_eq, ← NormedAddGroup.dist_eq]
+      simp_rw [sub_def, norm_def, ← NormedAddGroup.dist_eq]
       apply dist_triangle
     eq_of_dist_eq_zero := by
       apply DirectLimit.induction₂ (C := fun x y => ‖x - y‖ = 0 → x = y)
