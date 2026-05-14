@@ -3,6 +3,19 @@ import Mathlib.Analysis.Normed.Group.Defs
 import Mathlib.Topology.MetricSpace.Isometry
 import Mathlib.Algebra.Colimit.DirectLimit
 
+section Norm
+
+class NormPreservingClass (F : Type*) (α β : outParam Type*)
+    [Norm α] [Norm β] [FunLike F α β] : Prop where
+  norm_map : ∀ (f : F) (x : α), ‖f x‖ = ‖x‖
+
+class IsNormPreservingMap {α β : Type*} [Norm α] [Norm β] (f : α → β) : Prop where
+  norm_map : ∀ x, ‖f x‖ = ‖x‖
+
+
+end Norm
+
+
 namespace DirectLimit
 
 variable {ι : Type*} [Preorder ι] {G : ι → Type*}
@@ -13,6 +26,21 @@ variable [IsDirectedOrder ι]
 section norm
 
 variable [∀ i, Norm (G i)]
+
+instance instNorm3 [∀ i j h, IsNormPreservingMap (f i j h)] : Norm (DirectLimit G f) where
+  norm := DirectLimit.lift f (ih := fun i x => ‖(x : G i)‖) fun _i _j _h x =>
+    (IsNormPreservingMap.norm_map x).symm
+
+instance instNorm2 [∀ i j h, NormPreservingClass (T h) (G i) (G j)] : Norm (DirectLimit G f) where
+  norm := DirectLimit.lift f (ih := fun i x => ‖(x : G i)‖) fun i j h x =>
+    (NormPreservingClass.norm_map (f i j h) x).symm
+
+section foo
+
+variable [∀ i j h, NormPreservingClass (T h) (G i) (G j)]
+#synth Norm (DirectLimit G f)
+
+end foo
 
 variable (G f) in
 class NormCompat : Prop where
