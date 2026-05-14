@@ -234,23 +234,6 @@ noncomputable instance : CStarAlgebra (Completion (DirectLimit G f)) where
       -- TODO : again, the `_root_.star_def` is to get the one from the completion, but it shouldn't be in the root namespace
       rw [_root_.star_def, @star_smul]
 
-section someCasts
-
-variable (A B R : Type*) [Semiring A] [Semiring B] [CommSemiring R] [Star A] [Star B]
-variable [Algebra R A] [Algebra R B]
-
-#check A
-/-
-def _root_.NonUnitalStarAlgHom.toStarRingHom (f : A →⋆ₙₐ[R] B) : A →⋆ₙ+* B where
-  toFun := f
-  map_zero' := f.map_zero'
-  map_add' := f.map_add'
-  map_mul' := f.map_mul'
-  map_star' := f.map_star'
--/
-
-
-end someCasts
 
 namespace CStarAlgebra
 
