@@ -48,8 +48,15 @@ variable [Nonempty ι]
 set_option diagnostics true in
 #synth NonUnitalRing (DirectLimit G f)
 
+#synth Norm (DirectLimit G f)
+#synth ∀ i, NormedAddGroup (G i)
+
+#check DirectLimit.instNormedAddGroup
+
 noncomputable instance instNonUnitalNormedRing : NonUnitalNormedRing (DirectLimit G f) where
-  dist_eq := by intro x y; rfl
+  __ := instNormedAddCommGroup
+  __ := instNonUnitalRingOfNonUnitalRingHomClass
+  --dist_eq := by intro x y; rfl
   norm_mul_le := by
     apply DirectLimit.induction₂ (C := fun x y => ‖x * y‖ ≤ ‖x‖ * ‖y‖)
     intro i x y
@@ -233,12 +240,15 @@ variable (A B R : Type*) [Semiring A] [Semiring B] [CommSemiring R] [Star A] [St
 variable [Algebra R A] [Algebra R B]
 
 #check A
+/-
 def _root_.NonUnitalStarAlgHom.toStarRingHom (f : A →⋆ₙₐ[R] B) : A →⋆ₙ+* B where
   toFun := f
   map_zero' := f.map_zero'
   map_add' := f.map_add'
   map_mul' := f.map_mul'
   map_star' := f.map_star'
+-/
+
 
 end someCasts
 
@@ -247,11 +257,36 @@ namespace CStarAlgebra
 #synth CStarAlgebra (Completion (DirectLimit G f))
 
 variable (A : Type*) [CStarAlgebra A]
-def lift (g : ∀ i, G i →⋆ₐ[ℂ] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+noncomputable def lift (g : ∀ i, G i →⋆ₐ[ℂ] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
     DirectLimit G f →⋆ₐ[ℂ] A where
-  __ := DirectLimit.Ring.lift (G := G) (f := f) (P := A) (g := fun i => (g i).toAlgHom) (Hg := Hg)
-  __ := DirectLimit.StarRing.lift (G := G) (f := f) (A := A) (g := fun i => (g i).toNonUnitalStarAlgHom.toStarRingHom) (Hg := Hg)
   toFun := _root_.DirectLimit.lift _ (g · ·) fun i j h x ↦ (Hg i j h x).symm
+  __ := DirectLimit.StarAlgebra.lift (G := G) (f := f) (g := fun i => (g i)) (Hg := Hg)
+  /-
+  __ := DirectLimit.Ring.lift (G := G) (f := f) (P := A) (g := fun i => (g i).toAlgHom) (Hg := Hg)
+  __ := DirectLimit.StarRing.lift (G := G) (f := f) (A := A) (g := fun i => (g i)) (Hg := Hg)
+  -/
+
+example (g : ∀ i, G i →⋆ₐ[ℂ] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+    DirectLimit.StarAlgebra.lift (G := G) (f := f) (g := fun i => (g i)) (Hg := Hg) =
+    DirectLimit.CStarAlgebra.lift (G := G) (f := f) (g := fun i => (g i)) (Hg := Hg):= by
+  rfl
+
+variable (g : ∀ i, G i →⋆ₐ[ℂ] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x)
+instance [Hg_norm : ∀ (i : ι), IsNormPreservingMap (g i)] :
+    IsNormPreservingMap (DirectLimit.StarAlgebra.lift G f (g := (g ·)) (Hg := Hg)) where
+  norm_map x := norm_lift (g · ·) (fun i j h xi ↦ (Hg i j h xi).symm)
+    (fun i x ↦ (Hg_norm i).norm_map x) x
+/-
+  by
+    --intro x
+    --have h : (StarAlgebra.lift G f A (g ·) Hg) x =
+    --  (DirectLimit.lift f (g · ·) (fun i j hij xi ↦ (Hg i j hij xi).symm)) x := by rfl
+    --rw [h]
+    change ‖DirectLimit.lift f (g · ·) (fun i j hij xi ↦ (Hg i j hij xi).symm) x‖ = ‖x‖
+    exact norm_lift (g · ·) (fun i j h xi ↦ (Hg i j h xi).symm) (fun i x ↦ (Hg_norm i).norm_map x) x
+    --apply norm_lift
+    --exact (fun i ↦ (Hg_norm i).norm_map)
+-/
 
 end CStarAlgebra
 
