@@ -174,7 +174,7 @@ variable [Nonempty ι]
 open UniformSpace
 #synth CStarRing (Completion (DirectLimit G f))
 #synth ∀ i, Algebra ℂ (G i)
-variable [∀ i j h, AlgHomClass (T h) ℂ (G i) (G j)]
+--variable [∀ i j h, AlgHomClass (T h) ℂ (G i) (G j)]
 #synth Algebra ℂ (DirectLimit G f)
 
 local instance {A : Type*} [UniformSpace A] [Ring A] [Algebra ℂ A]
@@ -227,8 +227,33 @@ noncomputable instance : CStarAlgebra (Completion (DirectLimit G f)) where
       -- TODO : again, the `_root_.star_def` is to get the one from the completion, but it shouldn't be in the root namespace
       rw [_root_.star_def, @star_smul]
 
+section someCasts
+
+variable (A B R : Type*) [Semiring A] [Semiring B] [CommSemiring R] [Star A] [Star B]
+variable [Algebra R A] [Algebra R B]
+
+#check A
+def _root_.NonUnitalStarAlgHom.toStarRingHom (f : A →⋆ₙₐ[R] B) : A →⋆ₙ+* B where
+  toFun := f
+  map_zero' := f.map_zero'
+  map_add' := f.map_add'
+  map_mul' := f.map_mul'
+  map_star' := f.map_star'
+
+end someCasts
+
+namespace CStarAlgebra
+
 #synth CStarAlgebra (Completion (DirectLimit G f))
 
+variable (A : Type*) [CStarAlgebra A]
+def lift (g : ∀ i, G i →⋆ₐ[ℂ] A) (Hg : ∀ i j hij x, g j (f i j hij x) = g i x) :
+    DirectLimit G f →⋆ₐ[ℂ] A where
+  __ := DirectLimit.Ring.lift (G := G) (f := f) (P := A) (g := fun i => (g i).toAlgHom) (Hg := Hg)
+  __ := DirectLimit.StarRing.lift (G := G) (f := f) (A := A) (g := fun i => (g i).toNonUnitalStarAlgHom.toStarRingHom) (Hg := Hg)
+  toFun := _root_.DirectLimit.lift _ (g · ·) fun i j h x ↦ (Hg i j h x).symm
+
+end CStarAlgebra
 
 
 end CStarAlgebra
