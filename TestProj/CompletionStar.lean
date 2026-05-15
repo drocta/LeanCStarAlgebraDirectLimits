@@ -2,6 +2,7 @@ import Mathlib.Topology.Algebra.Star
 import Mathlib.Topology.Algebra.GroupCompletion
 import Mathlib.Topology.Algebra.UniformRing
 import Mathlib.Topology.Constructions.SumProd
+import Mathlib.Algebra.Star.StarAlgHom
 
 
 noncomputable section
@@ -127,5 +128,39 @@ instance : StarRing (Completion α) where
 end StarRing
 
 --TODO : Maybe later add an instance for `StarModule R (Completion α)` given `StarModule R α` etc.
+
+namespace UniformSpace.Completion.StarAlgebra
+
+variable {k : Type*} [CommSemiring k]
+variable {α : Type*} [Ring α] [UniformSpace α] [IsUniformAddGroup α] [IsTopologicalRing α]
+  [StarRing α] [Algebra k α] [UniformContinuousConstSMul k α] [UniformContinuousStar α]
+variable {β : Type u} [UniformSpace β] [Ring β] [IsUniformAddGroup β] [IsTopologicalRing β]
+  [StarRing β] [Algebra k β] [ContinuousStar β]
+variable (f : α →⋆ₐ[k] β) (hf : Continuous f)
+
+--probably should also make a version of this for just extensionAlgHom
+def extensionStarAlgHom [CompleteSpace β] [T0Space β] : Completion α →⋆ₐ[k] β :=
+  have hf' : Continuous (f : α →+ β) := hf
+  -- helping the elaborator
+  have hf'' : UniformContinuous f := uniformContinuous_addMonoidHom_of_continuous hf'
+  { toFun := Completion.extension f
+    __ := Completion.extensionHom f.toRingHom hf
+    commutes' r := by
+      rw [algebraMap_def, extension_coe hf'']
+      exact f.commutes' r
+    map_star' x := Completion.induction_on x
+      (isClosed_eq (by fun_prop) (continuous_star.comp (by fun_prop)))
+      fun a => by simp_rw [star_def (α := α), extension_coe hf'', map_star f]}
+
+/-
+        by
+        have h_cont_star := continuous_star (R := β)
+        exact (continuous_star (R := β)).comp (by fun_prop)
+        )
+-/
+-- ⇑
+
+end UniformSpace.Completion.StarAlgebra
+
 
 end
